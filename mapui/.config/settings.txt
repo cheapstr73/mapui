@@ -1,0 +1,1 @@
+GMTPATH=/usr/share/gmt/ 
