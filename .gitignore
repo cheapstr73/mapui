@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# .map files
+.map
+.js
+.xy
+
+#test output folder
+test_output/
