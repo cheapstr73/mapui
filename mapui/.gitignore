@@ -2,3 +2,10 @@ __pycache__/
 example.js
 fort.py
 test.txt
+# .map files
+.map
+.js
+.xy
+
+#test output folder
+test_output/
