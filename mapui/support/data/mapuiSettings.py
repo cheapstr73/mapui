@@ -34,6 +34,40 @@ class mapuiSettings():
         return units
 
     @staticmethod 
+    def getBorderTypes():
+        borders = [
+            ['National Boundaries', '1'],
+            ['State Boundaries (Americas)', '2'],
+            ['Marine Boundaries', '3'],
+            ['All Boundaries', 'a']
+        ]
+        return borders
+
+    @staticmethod 
+    def getRiverTypes():
+        rivers = [
+            ["None", '-1'],
+            ["Double-Lined Rivers (River-Lakes)", "0"],
+            ["Permanent Major Rivers", "1"],
+            ["Additional Major Rivers", "2"],
+            ["Additional Rivers", "3"],
+            ["Minor Rivers", "4"],
+            ["Intermittent Rivers - Major", "5"],
+            ["Intermittent Rivers - Additional", "6"],
+            ["Intermittent Rivers - Minor", "7"],
+            ["Major Canals", "8"],
+            ["Minor Canals", "9"],
+            ["Irrigation Canals", "10"],
+            ["All Rivers And Canals", "a "],
+            ["All Rivers And Canals Except River-Lakes", "A "],
+            ["All Permanent Rivers", "r "],
+            ["All Permanent Rivers Except River-Lakes", "R "],
+            ["All Intermittent Rivers", "i "],
+            ["All Canals", "c "]
+        ]
+        return rivers
+
+    @staticmethod 
     def getScalebarPositioning():
         pos = [
             ["Top Left", "TL"],

@@ -14,7 +14,7 @@ from support.data.gmtFont import gmtFont
 from support.data.gmtMap import gmtMap
 from support.widgets.ColorPaletteViewer import PaletteViewer
 from support.data.gmtMapScript import gmtMapScript
-from support.data.mapuiOptionsWin import mapUIOptions
+from support.data.gmtMapOptionsWin import mapUIOptions
 import sys
 import pickle
 import re
@@ -165,7 +165,7 @@ class mainWin(qtw.QDialog):
     #This will create the file menu and sub-menu items
     ##########################################################################################################################
     def createFileMenu(self):
-        self.convertFormats = ['PDF']
+        self.convertFormat = 'f'
 
         menuBar = qtw.QMenuBar()
         fileMenu = menuBar.addMenu('&File')
@@ -177,7 +177,8 @@ class mainWin(qtw.QDialog):
         saveAction = qtw.QAction(self.saveIcon, '&Save Parameters', self)
         loadAction = qtw.QAction(self.loadIcon, '&Load Parameters', self)
         optionsAction = qtw.QAction(self.optionsIcon, '&Options', self)
-        helpAction = qtw.QAction(self.helpIcon, '&Help', self)
+
+        #These are the checkable menu items for output conversion formats...
         self.bmpAction = qtw.QAction('BMP (Bitmap', self)
         self.epsAction = qtw.QAction('EPS (Encapsulated PostScript)', self)     
         self.jpgAction = qtw.QAction('JPG (JPEG)', self)
@@ -185,10 +186,24 @@ class mainWin(qtw.QDialog):
         self.pngAction = qtw.QAction('PNG (Portable Network Graphic)', self)
         self.pngTAction = qtw.QAction('PNG (With Transparency)', self)
         self.ppmAction = qtw.QAction('PPM (Portable Pixmap Image)', self)
-        self.svgAction = qtw.QAction('SVG (Scalable Vector Graphic)', self)
+        #self.svgAction = qtw.QAction('SVG (Scalable Vector Graphic)', self)
         self.tiffAction = qtw.QAction('TIFF (Tagged Image File Format)', self)
+        helpAction = qtw.QAction(self.helpIcon, '&Help', self)
         aboutAction = qtw.QAction(self.windowIcon, '&About MapUI', self)
-     
+        
+        #Group the clickable menu items into a 
+        group = qtw.QActionGroup(self.convertMenu)
+        group.setExclusive(True)
+        group.addAction(self.bmpAction)
+        group.addAction(self.epsAction)
+        group.addAction(self.jpgAction)
+        group.addAction(self.pdfAction)
+        group.addAction(self.pngAction)
+        group.addAction(self.pngTAction)
+        group.addAction(self.ppmAction)
+        #group.addAction(self.svgAction)
+        group.addAction(self.tiffAction)
+
         #Set the output formats to checkable items...
         self.bmpAction.setCheckable(True)
         self.epsAction.setCheckable(True)
@@ -197,35 +212,35 @@ class mainWin(qtw.QDialog):
         self.pngAction.setCheckable(True)
         self.pngTAction.setCheckable(True)
         self.ppmAction.setCheckable(True)
-        self.svgAction.setCheckable(True)
+        #self.svgAction.setCheckable(True)
         self.tiffAction.setCheckable(True)
 
         #Add the menu events...
         saveAction.triggered.connect(self.saveParameters)
         loadAction.triggered.connect(self.loadParameters)
         optionsAction.triggered.connect(self.openOptions)
-        self.bmpAction.triggered.connect(self.toggleBMP)
-        self.epsAction.triggered.connect(self.toggleEPS)
-        self.jpgAction.triggered.connect(self.toggleJPG)
-        self.pdfAction.triggered.connect(self.togglePDF)
-        self.pngAction.triggered.connect(self.togglePNG)
-        self.pngTAction.triggered.connect(self.togglePNGT)
-        self.ppmAction.triggered.connect(self.togglePPM)
-        self.svgAction.triggered.connect(self.toggleSVG)
-        self.tiffAction.triggered.connect(self.toggleTIFF)
+        self.bmpAction.triggered.connect(lambda status : self.toggleFormat('b'))
+        self.epsAction.triggered.connect(lambda status : self.toggleFormat('e'))
+        self.jpgAction.triggered.connect(lambda status : self.toggleFormat('j'))
+        self.pdfAction.triggered.connect(lambda status : self.toggleFormat('f'))
+        self.pngAction.triggered.connect(lambda status : self.toggleFormat('g'))
+        self.pngTAction.triggered.connect(lambda status : self.toggleFormat('G'))
+        self.ppmAction.triggered.connect(lambda status : self.toggleFormat('m'))
+        #self.svgAction.triggered.connect(lambda status : self.toggleFormat('s'))
+        self.tiffAction.triggered.connect(lambda status : self.toggleFormat('t'))
 
         #Add menu items to the menus
         fileMenu.addAction(saveAction)
         fileMenu.addAction(loadAction)
         optionsMenu.addAction(optionsAction)
         self.convertMenu.addAction(self.bmpAction)
-        self.convertMenu.addAction(self.epsAction)
-        self.convertMenu.addAction(self.pdfAction)
+        self.convertMenu.addAction(self.epsAction)       
         self.convertMenu.addAction(self.jpgAction)
+        self.convertMenu.addAction(self.pdfAction)
         self.convertMenu.addAction(self.pngAction)
         self.convertMenu.addAction(self.pngTAction)
         self.convertMenu.addAction(self.ppmAction)
-        self.convertMenu.addAction(self.svgAction)
+        #self.convertMenu.addAction(self.svgAction)
         self.convertMenu.addAction(self.tiffAction)
         helpMenu.addAction(aboutAction)
         helpMenu.addAction(helpAction)
@@ -235,9 +250,10 @@ class mainWin(qtw.QDialog):
     ###########################################################################################################################
     #Add/Remove items from the convertFormats list; based on the state of each checkable menu item
     ###########################################################################################################################
-    def toggleBMP(self):
-        self.convertFormats.append('b') if self.bmpAction.isChecked() else self.convertFormats.remove('b')
-    def toggleEPS(self):
+    def toggleFormat(self, filetype):
+        self.convertFormat = filetype
+
+    """def toggleEPS(self):
         self.convertFormats.append('e') if self.epsAction.isChecked() else self.convertFormats.remove('e')
     def togglePDF(self):
         self.convertFormats.append('f') if self.pdfAction.isChecked() else self.convertFormats.remove('f')
@@ -252,7 +268,7 @@ class mainWin(qtw.QDialog):
     def toggleSVG(self):
         self.convertFormats.append('s') if self.svgAction.isChecked() else self.convertFormats.remove('s')
     def toggleTIFF(self):
-        self.convertFormats.append('t') if self.tiffAction.isChecked() else self.convertFormats.remove('t')
+        self.convertFormats.append('t') if self.tiffAction.isChecked() else self.convertFormats.remove('t')"""
 
     ###########################################################################################################################
     #Show the main options window
@@ -468,9 +484,15 @@ class mainWin(qtw.QDialog):
         self.gmtMap.SymbologySizeUnit = self.options.combo_symbology_size_unit.currentText()
         self.gmtMap.SymbologyFillColor = self.options.cbtn_symbology_fill.getCurrentFillColor()
         self.gmtMap.SymbologyBorderColor = self.options.cbtn_symbology_fill.getCurrentBorderColor()
-
+        self.gmtMap.CoastlineFillColor = self.options.cbtn_coastlines_fill.getCurrentFillColor()
+        self.gmtMap.CoastlineBorderColor = self.options.cbtn_coastlines_fill.getCurrentBorderColor()
+        #self.gmtMap.CoastlineNationalBoundaryColor = self.options.getCoastlineNationalBoundaryColor()
+        self.gmtMap.CoastlineNationalBoundaryType = self.options.combo_coastline_national_boundary_type.currentText()
+        self.gmtMap.CoastlineNationalBoundaryColor = self.options.lcbtn_national_boundary.getCurrentLineColor()
+        self.gmtMap.CoastlineNationalBoundaryWeight = self.options.lcbtn_national_boundary.getCurrentLineWeight()
+        self.gmtMap.CoastlineRiverType = self.options.combo_coastline_river_type.currentText()
         #Package the output types..
-        self.gmtMap.ConvertTypes = sorted(self.convertFormats)
+        self.gmtMap.ConvertTypes = self.convertFormat
          
     ###########################################################################################################################
     #This will call up a QFileDialog for saving the map parameters (.map file)
@@ -569,12 +591,18 @@ class mainWin(qtw.QDialog):
         self.options.combo_symbology_size_unit.setCurrentText(self.gmtMap.SymbologySizeUnit)
         self.options.cbtn_symbology_fill.setCurrentFillColor(self.gmtMap.SymbologyFillColor)
         self.options.cbtn_symbology_fill.setCurrentBorderColor(self.gmtMap.SymbologyBorderColor) 
+        self.options.cbtn_coastlines_fill.setCurrentFillColor(self.gmtMap.CoastlineFillColor)
+        self.options.cbtn_coastlines_fill.setCurrentBorderColor(self.gmtMap.CoastlineBorderColor)
+        self.options.combo_coastline_national_boundary_type.setCurrentText(self.gmtMap.CoastlineNationalBoundaryType)
+        #self.options.setCoastlineNationalBoundaryColor(self.gmtMap.CoastlineNationalBoundaryColor)
+        self.options.lcbtn_national_boundary.setCurrentLineColor(self.gmtMap.CoastlineNationalBoundaryColor)
+        self.options.lcbtn_national_boundary.setCurrentLineWeight(self.gmtMap.CoastlineNationalBoundaryWeight)
+        self.options.combo_coastline_river_type.setCurrentText(self.gmtMap.CoastlineRiverType)
 
     def executeScript(self):
-        self.createMapObject() 
-        #output = "./test_output/myTest"
+        self.createMapObject()  
         gmtMapScript(self.gmtMap)
-        cmd = "cd \'" +  path.split(self.gmtMap.FileOutput)[0] + "\' && sh " + path.split(self.gmtMap.FileOutput)[1] + '.sh'            
+        cmd = "cd \'" +  path.split(self.gmtMap.FileOutput)[0] + "\' && sh " + path.split(self.gmtMap.FileOutput)[1][:-3] + '.sh'                  
         system(cmd)
         self.showMessage(1, "", "Process Completed!")
 

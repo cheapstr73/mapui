@@ -8,11 +8,11 @@ class gmtMap(gmtMapOptions):
         self.initializeDefaults()
 
     @property 
-    def ConvertTypes(self):
-        return self.__ConvertTypes 
-    @ConvertTypes.setter 
-    def ConvertTypes(self, types):
-        self.__ConvertTypes = types
+    def ConvertType(self):
+        return self.__ConvertType
+    @ConvertType.setter 
+    def ConvertType(self, type):
+        self.__ConvertType = type
 
     @property 
     def CPTFile(self):
@@ -113,7 +113,7 @@ class gmtMap(gmtMapOptions):
         self.__ScaleUnit = scaleUnit 
 
     def initializeDefaults(self):
-        self.ConvertTypes = ['PDF']
+        self.ConvertType = 'f'
         self.FileInput = None
         self.ROINorth = '60'
         self.ROISouth = '50'

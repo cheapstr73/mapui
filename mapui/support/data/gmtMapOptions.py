@@ -36,6 +36,54 @@ class gmtMapOptions():
         self.SymbologySizeUnit = 'Points'
         self.SymbologyFillColor = qtg.QColor(255,0,0)
         self.SymbologyBorderColor = qtg.QColor(0,0,0) 
+        self.CoastlineFillColor = qtg.QColor(255,255,255)
+        self.CoastlineBorderColor = qtg.QColor(190,190,190)
+        self.CoastlineNationalBoundaryColor = qtg.QColor(190,190,190)
+        self.CoastlineNationalBoundaryWeight = 1
+        self.CoastlineNationalBoundaryType = 'National Boundaries'
+        self.CoastlineRiverType = 'None'
+
+    @property
+    def CoastlineFillColor(self):
+        return self.__CoastlineFillColor
+    @CoastlineFillColor.setter 
+    def CoastlineFillColor(self, fill):
+        self.__CoastlineFillColor = fill
+
+    @property
+    def CoastlineBorderColor(self):
+        return self.__CoastlineBorderColor
+    @CoastlineBorderColor.setter 
+    def CoastlineBorderColor(self, borderColor):
+        self.__CoastlineBorderColor = borderColor
+    
+    @property 
+    def CoastlineNationalBoundaryType(self):
+        return self.__CoastlineNationalBoundaryType
+    @CoastlineNationalBoundaryType.setter 
+    def CoastlineNationalBoundaryType(self, tp):
+        self.__CoastlineNationalBoundaryType = tp
+
+    @property 
+    def CoastlineNationalBoundaryColor(self):
+        return self.__CoastlineNationalBoundaryColor
+    @CoastlineNationalBoundaryColor.setter 
+    def CoastlineNationalBoundaryColor(self, color):
+        self.__CoastlineNationalBoundaryColor = color
+
+    @property 
+    def CoastlineNationalBoundaryWeight(self):
+        return self.__CoastlineNationalBoundaryWeight
+    @CoastlineNationalBoundaryWeight.setter 
+    def CoastlineNationalBoundaryWeight(self, w):
+        self.__CoastlineNationalBoundaryWeight = w
+
+    @property 
+    def CoastlineRiverType(self):
+        return self.__CoastlineRiverType
+    @CoastlineRiverType.setter 
+    def CoastlineRiverType(self, tp):
+        self.__CoastlineRiverType = tp
 
     @property 
     def MapClassificationAdd(self):

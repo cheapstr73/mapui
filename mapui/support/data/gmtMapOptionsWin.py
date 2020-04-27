@@ -4,6 +4,7 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import uic
 from support.data.mapuiSettings import mapuiSettings
 from support.widgets.ColorToolButton import ColorToolButton
+from support.widgets.LineColorButton import LineColorButton
 
 ###########################################################################################################################
 #This class loads the options.ui file and creates the options window
@@ -28,6 +29,7 @@ class mapUIOptions(qtw.QDialog):
         self.btn_map_classification_font_color.setIcon(qtg.QIcon('./support/icons/color2.png'))
         self.iconH = qtg.QPixmap('./support/icons/orientationH2.png')
         self.iconP = qtg.QPixmap('./support/icons/orientationP2.png')
+        self.colorPaletteIcon = qtg.QIcon('./support/icons/color2.png')
         
         #Populate the combo boxes... 
         self.combo_symbology_size_unit.addItems(mapuiSettings.getUnitsOfMeasure())
@@ -37,6 +39,13 @@ class mapUIOptions(qtw.QDialog):
         self.combo_scalebar_offset_unit.addItems(mapuiSettings.getUnitsOfMeasure())
         self.combo_map_title_offset_unit.addItems(mapuiSettings.getUnitsOfMeasure())
         self.combo_map_classification_offset_unit.addItems(mapuiSettings.getUnitsOfMeasure()) 
+
+        #Add the coastline border types 
+        for item in mapuiSettings.getBorderTypes():
+            self.combo_coastline_national_boundary_type.addItem(item[0])
+
+        for item in mapuiSettings.getRiverTypes():
+            self.combo_coastline_river_type.addItem(item[0])
 
         #Add the scalebar postioning items...
         for item in mapuiSettings.getScalebarPositioning():
@@ -56,7 +65,6 @@ class mapUIOptions(qtw.QDialog):
 
         self.radio_symlevel0.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
 
-    
         #Attach signals to slots..
         self.radio_symlevel0.clicked.connect(self.checkLevels)
         self.radio_symlevel1.clicked.connect(self.checkLevels)
@@ -64,13 +72,23 @@ class mapUIOptions(qtw.QDialog):
         self.spin_page_height.valueChanged.connect(self.swapIcon)
         self.spin_page_width.valueChanged.connect(self.swapIcon)
         self.chk_add_map_title.stateChanged.connect(self.toggleMapTitle)
-        self.chk_add_map_classification.stateChanged.connect(self.toggleClassification)
+        self.chk_add_map_classification.stateChanged.connect(self.toggleClassification) 
         self.swapIcon()
 
-        self.cbtn_symbology_fill = ColorToolButton(0)
+        self.cbtn_symbology_fill = ColorToolButton()
         self.color_button_layout.addWidget(self.cbtn_symbology_fill)
+        self.cbtn_coastlines_fill = ColorToolButton()
+        self.coastline_color_layout.addWidget(self.cbtn_coastlines_fill)
         self.btn_map_title_font_color.clicked.connect(self.chooseFontColor)
         self.btn_map_classification_font_color.clicked.connect(self.chooseFontColor)
+
+        #Coastline National Boundary data 
+        self.lcbtn_national_boundary = LineColorButton()
+        self.coastline_national_boundary_layout.addWidget(self.lcbtn_national_boundary)
+        
+        #Coastline River Data...
+        lcbtn_rivers = LineColorButton() 
+        self.coastline_river_color_layout.addWidget(lcbtn_rivers)
 
         self.combo_scalebar_position.currentIndexChanged.connect(self.comboPositionChanged)
         self.checkLevels()
@@ -151,6 +169,14 @@ class mapUIOptions(qtw.QDialog):
             elif btn.objectName() == 'btn_map_classification_font_color':
                 self.setMapClassificationColor(cChooser.selectedColor()) 
     
+    def chooseBoundaryColor(self):
+        cChooser = qtw.QColorDialog(self)    
+        cChooser.setCurrentColor(self.getMapTitleColor())
+        if cChooser.exec() == qtw.QColorDialog.Accepted:  
+            btn = self.sender()
+            if str(btn.objectName()) == 'btn_coastline_boundary_color': 
+                self.setCoastlineNationalBoundaryColor(cChooser.selectedColor()) 
+
     def toggleMapTitle(self):
         if self.chk_add_map_title.isChecked():
             self.txt_map_title.setEnabled(True)
@@ -206,4 +232,8 @@ class mapUIOptions(qtw.QDialog):
     def getMapClassificationColor(self):
         return self.__MapClassificationColor
 
+    def setCoastlineNationalBoundaryColor(self, c):
+        self.__CoastlineNationalBoundaryColor = c 
+    def getCoastlineNationalBoundaryColor(self):
+        return self.__CoastlineNationalBoundaryColor
     

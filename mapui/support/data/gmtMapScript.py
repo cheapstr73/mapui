@@ -14,10 +14,10 @@ class gmtMapScript():
         self.gmtPath = mapuiSettings.getGMTPath() 
         self.output = gmtMap.FileOutput
         try:
-            self.output_basename = gmtMap.FileOutput[gmtMap.FileOutput.rfind('/')+1:]
+            self.output_basename = gmtMap.FileOutput[gmtMap.FileOutput.rfind('/')+1:][:-3]
             self.output_directory = gmtMap.FileOutput[:gmtMap.FileOutput.rfind('/')+1:]
-            self.output_ps = gmtMap.FileOutput + '.ps'
-            f = open(gmtMap.FileOutput + '.sh', 'w')
+            self.output_ps = self.output_directory + '/' + self.output_basename + ".ps"
+            f = open(self.output_directory + '/' + self.output_basename + '.sh' , 'w')
             f.close()
         except Exception as e:
             q = qtw.QMessageBox()
@@ -30,6 +30,17 @@ class gmtMapScript():
             if sym == item[0]:
                 return item[1]
         return None
+    def getNationaBoundaryCode(self, c):
+        for item in mapuiSettings.getBorderTypes():
+            if c == item[0]:
+                return item[1]
+        return None
+
+    def getRiverTypeCode(self, c):
+        for item in mapuiSettings.getRiverTypes():
+            if c == item[0]:
+                return item[1]
+        return None 
 
     def getScalebarPositioningCode(self, p):
         for item in mapuiSettings.getScalebarPositioning():
@@ -59,7 +70,7 @@ class gmtMapScript():
     ###########################################################################################################################
     def createScript(self):        
         try:
-            with open(self.output + ".sh", 'a') as script:
+            with open(self.output_directory + '/' + self.output_basename + '.sh', 'a') as script:
                 script.write("#!/bin/bash")
                 script.write('\n##########################################################################################')
                 script.write('\n#SET UP PATH REFERENCES')
@@ -138,6 +149,15 @@ class gmtMapScript():
                 script.write('\nsymbol_size_unit=%s' % self.__gmtMap.SymbologySizeUnit[:1].lower())
                 script.write('\nsymbol_fill_color=%s' % self.convertColor(self.__gmtMap.SymbologyFillColor))
                 script.write('\nsymbol_border_color=%s' % self.convertColor(self.__gmtMap.SymbologyBorderColor))
+                script.write('\ncoast_fill_color=%s' % self.convertColor(self.__gmtMap.CoastlineFillColor))
+                script.write('\ncoast_border_color=%s' % self.convertColor(self.__gmtMap.CoastlineBorderColor))
+                script.write('\nnational_boundaries_color=%s' % self.convertColor(self.__gmtMap.CoastlineNationalBoundaryColor))
+                script.write('\nnational_boundaries_type=%s' % self.getNationaBoundaryCode(self.__gmtMap.CoastlineNationalBoundaryType))
+                script.write('\nnational_boundaries_weight=%s' % self.__gmtMap.CoastlineNationalBoundaryWeight)
+                rivers = self.getRiverTypeCode(self.__gmtMap.CoastlineRiverType)
+                if rivers != '-1':
+                    script.write('\nriver_type=%s' % rivers)
+
                 script.write('\n##########################################################################################')
                 script.write('\n#END VARIABLE DECLARATIONS  | DO NOT ALTER CODE BEYOND THIS POINT')
                 script.write('\n##########################################################################################')
@@ -157,16 +177,23 @@ class gmtMapScript():
                 script.write('\ngmt makecpt -C${gmt_path}/cpt/$input_cpt -A${cpt_opacity} -T${cpt_min_value}/${cpt_max_value}/${cpt_interval} -Z -V > ${output_cpt}')
 
                 script.write('\n\n##########################################################################################')
-                script.write('\n#CREATE A BASE LAYER FOR PROJECTED DATA')
-                script.write('\n##########################################################################################')
-                script.write('\necho Creating Basemap...')
-                script.write('\ngmt psbasemap -R${RLL} -J${projection} -B${ln}g${ln}/${lt}g${lt}:.\"${map_title}\": -Xci -Yci -K > ${out_file}')
-
-                script.write('\n\n##########################################################################################')
                 script.write('\n#CREATE COASTLINE LAYER')
                 script.write('\n##########################################################################################')
                 script.write('\necho Creating Coastlines...')
-                script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,lightgrey -N1/0.5p,lightgrey -K -O -V >> ${out_file}')
+                #Add rivers
+                if rivers  != '-1':
+                    script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,${coast_border_color} -G${coast_fill_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -I${river_type} -K  -V > ${out_file}')
+                #Don't add rivers
+                else:
+                    script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,${coast_border_color} -G${coast_fill_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -K -V > ${out_file}')
+                
+
+                script.write('\n\n##########################################################################################')
+                script.write('\n#CREATE A BASE LAYER FOR PROJECTED DATA')
+                script.write('\n##########################################################################################')
+                script.write('\necho Creating Basemap...')
+                script.write('\ngmt psbasemap -R${RLL} -J${projection} -B${ln}g${ln}/${lt}g${lt}:.\"${map_title}\": -Xci -Yci -K -O -V >> ${out_file}')
+
 
                 script.write('\n\n##########################################################################################')
                 script.write('\n#PLOT THE XY DATA FROM THE INPUT FILE')
@@ -187,7 +214,7 @@ class gmtMapScript():
                     script.write('\n#ADD THE MAP CLASSSIFICATION AT THE TOP')
                     script.write('\n##########################################################################################')
                     pos = self.getClassificationPosition()
-                    script.write('\n\necho '+ str(pos[0]) + ' ' + str(pos[1]) + ' ${classification} | gmt pstext -R0/${page_width}/0/${page_height} -Jx1i -F+f${classification_font_size}p,${classification_font},${classification_color}+jTC -Xa${classification_offset_x}${classification_offset_unit} -Ya${classification_offset_y}${classification_offset_unit} -O -K -N >> ${out_file}' )
+                    script.write('\necho '+ str(pos[0]) + ' ' + str(pos[1]) + ' ${classification} | gmt pstext -R0/${page_width}/0/${page_height} -Jx1i -F+f${classification_font_size}p,${classification_font},${classification_color}+jTC -Xa${classification_offset_x}${classification_offset_unit} -Ya${classification_offset_y}${classification_offset_unit} -O -K -N >> ${out_file}' )
 
                 script.write('\n\n##########################################################################################')
                 script.write('\n#ADD THE MAP SCALEBAR AND COLOR SCHEME')
@@ -215,9 +242,10 @@ class gmtMapScript():
                 script.write('\n\n##########################################################################################')
                 script.write('\n#CONVERT THE POSTSCRIPT TO THE SELECTED OUTPUT FORMATS')
                 script.write('\n##########################################################################################')
-                script.write('\n\ngmt psconvert ${out_file} -Tf')
-                for i in self.__gmtMap.ConvertTypes:
-                    script.write('\n-- ' + i)
+                if self.__gmtMap.ConvertTypes:
+                    script.write('\n\ngmt psconvert ${out_file} -T' + str(self.__gmtMap.ConvertTypes))
+                     
+
         except Exception as e:
             m = qtw.QMessageBox()
             m.setText("Script Error\n" + str(e))
