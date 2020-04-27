@@ -8,10 +8,11 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc 
 from PyQt5 import uic
-from os import walk, system
+from os import walk, system, path
 from support.data.mapuiSettings import mapuiSettings
+from support.data.gmtFont import gmtFont
 from support.data.gmtMap import gmtMap
-from support.data.ColorPaletteViewer import PaletteViewer
+from support.widgets.ColorPaletteViewer import PaletteViewer
 from support.data.gmtMapScript import gmtMapScript
 from support.data.mapuiOptionsWin import mapUIOptions
 import sys
@@ -24,13 +25,16 @@ import re
 class mainWin(qtw.QDialog):
     def __init__(self):
         super(mainWin, self).__init__()
-        uic.loadUi('./support/interfaces/interface2.ui', self)
+        uic.loadUi('./support/interfaces/interface.ui', self)
+        #CHANGE BACK TO USER HOME DIR WHEN DONE TESTING...
+        self.currentDir = "/mnt/566A02716A024E65/MAPUI-BACKUP/GitHub/mapui/"
 
         #Decare the icons to be used...
         self.windowIcon = qtg.QIcon('./support/icons/map7.png')
         self.populateIcon = qtg.QIcon('./support/icons/fill1')
         self.saveIcon = qtg.QIcon('./support/icons/save4.png')
         self.openIcon = qtg.QIcon('./support/icons/open-file.png')
+        self.projectionIcon = qtg.QIcon('./support/icons/globe1.png')
         self.loadIcon = qtg.QIcon('./support/icons/open3.png')
         self.optionsIcon = qtg.QIcon('./support/icons/options10.png')
         self.helpIcon = qtg.QIcon('./support/icons/help1.png')
@@ -53,8 +57,7 @@ class mainWin(qtw.QDialog):
                 self.loadParameters(sys.argv[1])
                 self.analyzeInput(self.gmtMap.FileInput)
             else:
-                self.showMessage(4, "title", "NO")           
-
+                self.showMessage(4, "title", "NO")  
         self.show()
 
     ###########################################################################################################################
@@ -71,20 +74,23 @@ class mainWin(qtw.QDialog):
 
         #Add the icons for the window and button
         self.setWindowIcon(self.windowIcon)
-        self.btn_open_file.setIcon(self.openIcon)
+        self.btn_file_input.setIcon(self.openIcon)
         self.btn_fill_defaults.setIcon(self.populateIcon)
+        self.btn_select_projection.setIcon(self.projectionIcon)
         self.btn_save.setIcon(self.saveIcon)
         self.btn_load.setIcon(self.loadIcon)
         self.btn_options.setIcon(self.optionsIcon)
         self.btn_execute.setIcon(self.executeIcon)
+        self.btn_file_output.setIcon(self.openIcon)
         
         #Set button cursors
-        self.btn_open_file.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
+        self.btn_file_input.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
         self.btn_fill_defaults.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
 
         #Add signals to the slots 
         self.combo_cpt.currentIndexChanged.connect(self.viewPalette)   
-        self.btn_open_file.clicked.connect(self.openFile)  
+        self.btn_file_input.clicked.connect(self.inputFile)  
+        self.btn_file_output.clicked.connect(self.outputFile)
         self.btn_fill_defaults.clicked.connect(self.populateDefaults)      
         self.slider_opacity.valueChanged.connect(self.getSliderValue)
         self.btn_save.clicked.connect(self.saveParameters)
@@ -120,13 +126,51 @@ class mainWin(qtw.QDialog):
         self.lbl_slider_value.setText(str(self.slider_opacity.value()) + "%")
         self.btn_fill_defaults.setEnabled(False)
 
+        self.btn_execute.setEnabled(False)
+        self.monitorControls()
+        self.lockExecute()
+
+    def centerInterface(self):
+        pass
+
+    def monitorControls(self):
+        self.txt_file_input.textChanged.connect(self.lockExecute)
+        self.txt_north.textChanged.connect(self.lockExecute)
+        self.txt_south.textChanged.connect(self.lockExecute)
+        self.txt_east.textChanged.connect(self.lockExecute)
+        self.txt_west.textChanged.connect(self.lockExecute)
+        self.txt_cpt_min.textChanged.connect(self.lockExecute)
+        self.txt_cpt_max.textChanged.connect(self.lockExecute)
+        self.txt_cpt_interval.textChanged.connect(self.lockExecute)
+        self.combo_cpt_unit.currentIndexChanged.connect(self.lockExecute)
+        self.txt_file_output.textChanged.connect(self.lockExecute)
+
+    def lockExecute(self):
+        if (not self.txt_file_input.text() or 
+        not self.txt_north.text() or
+        not self.txt_south.text() or
+        not self.txt_east.text() or
+        not self.txt_west.text() or  
+        not self.txt_cpt_min.text() or
+        not self.txt_cpt_max.text() or
+        not self.txt_cpt_interval.text() or
+        not self.combo_cpt_unit.currentText() or
+        not self.txt_file_output.text()
+        ):
+            self.btn_execute.setEnabled(False)
+            return
+        self.btn_execute.setEnabled(True)
+        
     ###########################################################################################################################
     #This will create the file menu and sub-menu items
     ##########################################################################################################################
     def createFileMenu(self):
+        self.convertFormats = ['PDF']
+
         menuBar = qtw.QMenuBar()
         fileMenu = menuBar.addMenu('&File')
         optionsMenu = menuBar.addMenu('&Options')
+        self.convertMenu = menuBar.addMenu('&Output Formats')
         helpMenu = menuBar.addMenu('&Help')
 
         #Create the menu item actions
@@ -134,21 +178,85 @@ class mainWin(qtw.QDialog):
         loadAction = qtw.QAction(self.loadIcon, '&Load Parameters', self)
         optionsAction = qtw.QAction(self.optionsIcon, '&Options', self)
         helpAction = qtw.QAction(self.helpIcon, '&Help', self)
+        self.bmpAction = qtw.QAction('BMP (Bitmap', self)
+        self.epsAction = qtw.QAction('EPS (Encapsulated PostScript)', self)     
+        self.jpgAction = qtw.QAction('JPG (JPEG)', self)
+        self.pdfAction = qtw.QAction('PDF (Portable Document Format)', self)
+        self.pngAction = qtw.QAction('PNG (Portable Network Graphic)', self)
+        self.pngTAction = qtw.QAction('PNG (With Transparency)', self)
+        self.ppmAction = qtw.QAction('PPM (Portable Pixmap Image)', self)
+        self.svgAction = qtw.QAction('SVG (Scalable Vector Graphic)', self)
+        self.tiffAction = qtw.QAction('TIFF (Tagged Image File Format)', self)
         aboutAction = qtw.QAction(self.windowIcon, '&About MapUI', self)
- 
+     
+        #Set the output formats to checkable items...
+        self.bmpAction.setCheckable(True)
+        self.epsAction.setCheckable(True)
+        self.pdfAction.setCheckable(True)        
+        self.jpgAction.setCheckable(True)
+        self.pngAction.setCheckable(True)
+        self.pngTAction.setCheckable(True)
+        self.ppmAction.setCheckable(True)
+        self.svgAction.setCheckable(True)
+        self.tiffAction.setCheckable(True)
+
         #Add the menu events...
         saveAction.triggered.connect(self.saveParameters)
         loadAction.triggered.connect(self.loadParameters)
         optionsAction.triggered.connect(self.openOptions)
+        self.bmpAction.triggered.connect(self.toggleBMP)
+        self.epsAction.triggered.connect(self.toggleEPS)
+        self.jpgAction.triggered.connect(self.toggleJPG)
+        self.pdfAction.triggered.connect(self.togglePDF)
+        self.pngAction.triggered.connect(self.togglePNG)
+        self.pngTAction.triggered.connect(self.togglePNGT)
+        self.ppmAction.triggered.connect(self.togglePPM)
+        self.svgAction.triggered.connect(self.toggleSVG)
+        self.tiffAction.triggered.connect(self.toggleTIFF)
 
         #Add menu items to the menus
         fileMenu.addAction(saveAction)
         fileMenu.addAction(loadAction)
         optionsMenu.addAction(optionsAction)
+        self.convertMenu.addAction(self.bmpAction)
+        self.convertMenu.addAction(self.epsAction)
+        self.convertMenu.addAction(self.pdfAction)
+        self.convertMenu.addAction(self.jpgAction)
+        self.convertMenu.addAction(self.pngAction)
+        self.convertMenu.addAction(self.pngTAction)
+        self.convertMenu.addAction(self.ppmAction)
+        self.convertMenu.addAction(self.svgAction)
+        self.convertMenu.addAction(self.tiffAction)
         helpMenu.addAction(aboutAction)
         helpMenu.addAction(helpAction)
         self.menu_layout.addWidget(menuBar)
+        self.pdfAction.setChecked(True)
 
+    ###########################################################################################################################
+    #Add/Remove items from the convertFormats list; based on the state of each checkable menu item
+    ###########################################################################################################################
+    def toggleBMP(self):
+        self.convertFormats.append('b') if self.bmpAction.isChecked() else self.convertFormats.remove('b')
+    def toggleEPS(self):
+        self.convertFormats.append('e') if self.epsAction.isChecked() else self.convertFormats.remove('e')
+    def togglePDF(self):
+        self.convertFormats.append('f') if self.pdfAction.isChecked() else self.convertFormats.remove('f')
+    def toggleJPG(self):
+        self.convertFormats.append('j') if self.jpgAction.isChecked() else self.convertFormats.remove('j')
+    def togglePNG(self):
+        self.convertFormats.append('g') if self.pngAction.isChecked() else self.convertFormats.remove('g')
+    def togglePNGT(self):
+        self.convertFormats.append('G') if self.pngTAction.isChecked() else self.convertFormats.remove('G')
+    def togglePPM(self):
+        self.convertFormats.append('m') if self.ppmAction.isChecked() else self.convertFormats.remove('m')
+    def toggleSVG(self):
+        self.convertFormats.append('s') if self.svgAction.isChecked() else self.convertFormats.remove('s')
+    def toggleTIFF(self):
+        self.convertFormats.append('t') if self.tiffAction.isChecked() else self.convertFormats.remove('t')
+
+    ###########################################################################################################################
+    #Show the main options window
+    ###########################################################################################################################
     def openOptions(self):        
         self.options.show()
 
@@ -181,25 +289,7 @@ class mainWin(qtw.QDialog):
 
     ###########################################################################################################################
     #Read the first line of the input file and determine how many columns it contains.
-    ###########################################################################################################################
-    def readInputFile(self, input):
-        try:
-            with open(input, 'r') as f:
-                line = f.readline()
-                line = re.sub(r"[\n\t\s]+", ' ', line)
-                cols = line.split(' ')
-                count =0 
-                for col in cols:
-                    if col:
-                        if col.isdigit:
-                            count += 1
-                        else:
-                            return -1
-                return count
-        except Exception as e:
-            self.showMessage(1, '', str(e))
-            return -1
-    
+    ###########################################################################################################################    
     def analyzeInput(self, input):
         try:
             with open(input, 'r') as f:
@@ -226,7 +316,7 @@ class mainWin(qtw.QDialog):
                             elif i == 3:
                                 col3.append(float(cols[3]))
                     else:
-                        return
+                       break                    
                 col0.sort()
                 col1.sort()
                 col2.sort()
@@ -252,7 +342,8 @@ class mainWin(qtw.QDialog):
                 self.lbl_max.setText(str(self.FileMaxRange))
                 self.btn_fill_defaults.setEnabled(True)
         except Exception as e:
-            self.showMessage(1, '', str(e))
+            #self.showMessage(1, '', str(e))
+            self.showMessage(3,'Unknown Format', 'There are problems with the format of this file.\nProcessing this file may produce unexpected results.')
     
     def populateDefaults(self):
         self.txt_east.setText(str(self.FileMinLong))
@@ -280,11 +371,26 @@ class mainWin(qtw.QDialog):
     ###########################################################################################################################
     #This will call a QFileDialog in order to select the input file
     ###########################################################################################################################       
-    def openFile(self):
-        file = qtw.QFileDialog().getOpenFileName(self, 'Open File', ".\"" )
-        self.txt_input_file.setText(str(file[0]))
-        self.analyzeInput(str(file[0]))
-      
+    def inputFile(self):
+        file = qtw.QFileDialog().getOpenFileName(self, 'Open File', self.currentDir )[0]
+        if file:
+            self.txt_file_input.setText(str(file))
+            self.currentDir = path.split(file)[0]
+            self.analyzeInput(str(file))
+        else:
+            return
+
+    ###########################################################################################################################
+    #This will call a QFileDialog in order to select the input file
+    ###########################################################################################################################       
+    def outputFile(self):
+        file = qtw.QFileDialog().getSaveFileName(self, 'Output File', self.currentDir, "Postscript Files (*.ps)" )[0]
+        if file:
+            self.txt_file_output.setText(str(file))
+            self.currentDir = path.split(file)[0]             
+        else:
+            return
+
     ###########################################################################################################################
     #This will cause the color palette control to redraw. This will fire whenever a new .cpt file is selected from the combo box
     #or when the value is changed on the transparency slider control.
@@ -301,22 +407,39 @@ class mainWin(qtw.QDialog):
     #This will save the interface parameters and options to a gmtMap object
     ########################################################################################################################### 
     def createMapObject(self):
-        self.gmtMap.FileInput = self.txt_input_file.text().strip()
+        self.gmtMap.FileInput = self.txt_file_input.text().strip()
         self.gmtMap.ROINorth = self.txt_north.text().strip()
         self.gmtMap.ROISouth = self.txt_south.text().strip()
         self.gmtMap.ROIEast = self.txt_east.text().strip()
         self.gmtMap.ROIWest = self.txt_west.text().strip()
         self.gmtMap.CPTFile = self.combo_cpt.currentText()
-        self.gmtMap.Opacity = self.slider_opacity.value() 
+        self.gmtMap.Opacity = self.slider_opacity.value()         
         self.gmtMap.CPTMinValue = self.txt_cpt_min.text().strip()
         self.gmtMap.CPTMaxValue = self.txt_cpt_max.text().strip()
         self.gmtMap.CPTInterval = self.txt_cpt_interval.text().strip()
         self.gmtMap.ScaleUnit = self.combo_cpt_unit.currentText() 
         self.gmtMap.Projection = self.combo_projections.currentText()
+        self.gmtMap.FileOutput = self.txt_file_output.text().strip()
 
         #Get the properties from the options window...
         self.gmtMap.PageHeight = self.options.spin_page_height.value()
         self.gmtMap.PageWidth = self.options.spin_page_width.value()
+        self.gmtMap.MapClassificationAdd = self.options.chk_add_map_classification.isChecked()
+    
+        self.gmtMap.MapClassification = gmtFont(self.options.combo_map_classification_font.currentText(), self.options.spin_map_classification_font_size.value(), self.options.getMapClassificationColor(), self.options.txt_map_classification.text().strip())
+        
+        self.gmtMap.MapClassificationOffsetX = self.options.spin_map_classsification_offset_x.value()
+        self.gmtMap.MapClassificationOffsetY = self.options.spin_map_classsification_offset_y.value()
+        self.gmtMap.MapClassificationOffsetUnit = self.options.combo_map_classification_offset_unit.currentText()
+        self.gmtMap.MapTitleAdd = self.options.chk_add_map_title.isChecked() 
+
+        self.gmtMap.MapTitle = gmtFont(self.options.combo_map_title_font.currentText(), self.options.spin_map_title_font_size.value(), self.options.getMapTitleColor(), self.options.txt_map_title.text().strip())
+        
+        self.gmtMap.MapTitleFontSize = self.options.spin_map_title_font_size.value()
+
+        self.gmtMap.MapTitleOffsetX = self.options.spin_map_title_offset_x.value()
+        self.gmtMap.MapTitleOffsetY = self.options.spin_map_title_offset_y.value()
+        self.gmtMap.MapTitleOffsetUnit = self.options.combo_map_title_offset_unit.currentText()
         self.gmtMap.PageSizeUnit = self.options.combo_page_size_unit.currentText()
         
         if self.options.radio_symlevel0.isChecked():
@@ -345,15 +468,19 @@ class mainWin(qtw.QDialog):
         self.gmtMap.SymbologySizeUnit = self.options.combo_symbology_size_unit.currentText()
         self.gmtMap.SymbologyFillColor = self.options.cbtn_symbology_fill.getCurrentFillColor()
         self.gmtMap.SymbologyBorderColor = self.options.cbtn_symbology_fill.getCurrentBorderColor()
-       
+
+        #Package the output types..
+        self.gmtMap.ConvertTypes = sorted(self.convertFormats)
+         
     ###########################################################################################################################
     #This will call up a QFileDialog for saving the map parameters (.map file)
     ###########################################################################################################################
     def saveParameters(self):
         #Set up the file dialog with the appropriate options...
-        savefile = qtw.QFileDialog.getSaveFileName(self, 'Save Map Parameters', '~/', 'Map Parameters (.map)(*.map)')[0] 
+        savefile = qtw.QFileDialog.getSaveFileName(self, 'Save Map Parameters', self.currentDir, 'Map Parameters (.map)(*.map)')[0] 
         if savefile:
             self.createMapObject()
+            self.currentDir = path.split(savefile)[0]
         else:
             return
 
@@ -365,21 +492,22 @@ class mainWin(qtw.QDialog):
     ###########################################################################################################################
     def loadParameters(self, loadfile = None):
         if not loadfile:
-            loadfile = qtw.QFileDialog.getOpenFileName(self, 'Open Map Parameters', '~/', 'Map Parameters (.map)(*.map)')[0] 
-        #If user cancels the file selection, loadfile will still be null, so just return and do not throw the below exception
-        if not loadfile:
-            return             
+            loadfile = qtw.QFileDialog.getOpenFileName(self, 'Open Map Parameters', self.currentDir, 'Map Parameters (.map)(*.map)')[0] 
+        if loadfile:
+            self.currentDir = path.split(loadfile)[0]
+        else:
+            return            
         try:       
             with open(loadfile, 'rb') as f:    
                 self.gmtMap = pickle.load(f)                
                 self.populateForm() 
-                self.analyzeInput(self.txt_input_file.text())  
+                self.analyzeInput(self.txt_file_input.text())  
         except Exception as e:
             self.showMessage(3, "Error", "The file you are attempting to load does not appear to be a valid .map file!\nError: " + str(e)) 
             #self.showMessage(3, "Error", str(e)) 
 
     def populateForm(self):        
-        self.txt_input_file.setText(self.gmtMap.FileInput) 
+        self.txt_file_input.setText(self.gmtMap.FileInput) 
         self.txt_north.setText(self.gmtMap.ROINorth)
         self.txt_south.setText(self.gmtMap.ROISouth)
         self.txt_east.setText(self.gmtMap.ROIEast)
@@ -391,9 +519,29 @@ class mainWin(qtw.QDialog):
         self.txt_cpt_interval.setText(self.gmtMap.CPTInterval)
         self.combo_cpt_unit.setCurrentText(self.gmtMap.ScaleUnit)
         self.combo_projections.setCurrentText(self.gmtMap.Projection)
+        self.txt_file_output.setText(self.gmtMap.FileOutput)
         #Set the options window's properties
         self.options.spin_page_height.setValue(self.gmtMap.PageHeight)
         self.options.spin_page_width.setValue(self.gmtMap.PageWidth)
+        self.options.chk_add_map_classification.setChecked(self.gmtMap.MapClassificationAdd)
+        self.options.txt_map_classification.setText(self.gmtMap.MapClassification.text)
+
+        self.options.spin_map_classsification_offset_x.setValue(self.gmtMap.MapClassificationOffsetX)
+        self.options.spin_map_classsification_offset_y.setValue(self.gmtMap.MapClassificationOffsetY)
+        self.options.combo_map_classification_offset_unit.setCurrentText(self.gmtMap.MapClassificationOffsetUnit)
+        self.options.combo_map_classification_font.setCurrentText(self.gmtMap.MapClassification.font)
+        self.options.spin_map_classification_font_size.setValue(self.gmtMap.MapClassification.size)
+        self.options.setMapClassificationColor(self.gmtMap.MapClassification.color)
+        self.options.chk_add_map_title.setChecked(self.gmtMap.MapTitleAdd)
+
+        self.options.txt_map_title.setText(self.gmtMap.MapTitle.text)
+        self.options.combo_map_title_font.setCurrentText(self.gmtMap.MapTitle.font)
+        self.options.spin_map_title_font_size.setValue(self.gmtMap.MapTitle.size)
+        self.options.setMapTitleColor(self.gmtMap.MapTitle.color)
+
+        self.options.spin_map_title_offset_x.setValue(self.gmtMap.MapTitleOffsetX)
+        self.options.spin_map_title_offset_y.setValue(self.gmtMap.MapTitleOffsetY)
+        self.options.combo_map_title_offset_unit.setCurrentText(self.gmtMap.MapTitleOffsetUnit)
         self.options.combo_page_size_unit.setCurrentText(self.gmtMap.PageSizeUnit)
         if self.gmtMap.SymbologyLevel == 0:
             self.options.radio_symlevel0.setChecked(True)
@@ -401,7 +549,7 @@ class mainWin(qtw.QDialog):
             self.options.radio_symlevel1.setChecked(True)
         else:
             self.options.radio_symlevel2.setChecked(True)       
-
+ 
         self.options.radio_horizontal.setChecked(True) if self.gmtMap.ScalebarOrientation == 'h' else self.options.radio_vertical.setChecked(True)
         self.options.combo_scalebar_position.setCurrentText(self.gmtMap.ScalebarPositioning)
         self.options.spin_scalebar_interval.setValue(self.gmtMap.ScalebarInterval)  
@@ -420,13 +568,13 @@ class mainWin(qtw.QDialog):
         self.options.spin_symbology_size.setValue(self.gmtMap.SymbologySize)
         self.options.combo_symbology_size_unit.setCurrentText(self.gmtMap.SymbologySizeUnit)
         self.options.cbtn_symbology_fill.setCurrentFillColor(self.gmtMap.SymbologyFillColor)
-        self.options.cbtn_symbology_fill.setCurrentBorderColor(self.gmtMap.SymbologyBorderColor)
- 
+        self.options.cbtn_symbology_fill.setCurrentBorderColor(self.gmtMap.SymbologyBorderColor) 
+
     def executeScript(self):
         self.createMapObject() 
-        output = "./test_output/myTest"
-        gmtMapScript(self.gmtMap, output)
-        cmd = "cd " + "./test_output && sh " + 'myTest' + '.sh'        
+        #output = "./test_output/myTest"
+        gmtMapScript(self.gmtMap)
+        cmd = "cd \'" +  path.split(self.gmtMap.FileOutput)[0] + "\' && sh " + path.split(self.gmtMap.FileOutput)[1] + '.sh'            
         system(cmd)
         self.showMessage(1, "", "Process Completed!")
 

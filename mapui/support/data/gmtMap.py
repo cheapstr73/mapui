@@ -8,11 +8,11 @@ class gmtMap(gmtMapOptions):
         self.initializeDefaults()
 
     @property 
-    def test(self):
-        return self.__test 
-    @test.setter 
-    def test(self, t='Keith'):
-        self.__test = t 
+    def ConvertTypes(self):
+        return self.__ConvertTypes 
+    @ConvertTypes.setter 
+    def ConvertTypes(self, types):
+        self.__ConvertTypes = types
 
     @property 
     def CPTFile(self):
@@ -113,6 +113,7 @@ class gmtMap(gmtMapOptions):
         self.__ScaleUnit = scaleUnit 
 
     def initializeDefaults(self):
+        self.ConvertTypes = ['PDF']
         self.FileInput = None
         self.ROINorth = '60'
         self.ROISouth = '50'
@@ -125,6 +126,7 @@ class gmtMap(gmtMapOptions):
         self.CPTInterval = '10'
         self.ScaleUnit = 'mgals'
         self.Projection = 'Cylindrical Equidistant Projection'
+        self.FileOutput = None
 
     ###########################################################################################################################
     #This will return the central meridian of the East/West coordinates

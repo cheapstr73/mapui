@@ -1,13 +1,25 @@
 from PyQt5 import QtGui as qtg
+from support.data.gmtFont import gmtFont
+
 class gmtMapOptions():
     def __init__(self):
         self.PageHeight = 8.5
         self.PageWidth = 11.0
+        self.MapClassificationAdd = False
+        self.MapClassification = gmtFont()
+        self.MapClassificationOffsetX = 0.0
+        self.MapClassificationOffsetY = 0.0
+        self.MapClassificationOffsetUnit = 'Inches'
+        self.MapTitleAdd = True
+        self.MapTitle = gmtFont()
+        self.MapTitleOffsetX = 0.0
+        self.MapTitleOffsetY = 0.0
+        self.MapTitleOffsetUnit = 'Inches'
         self.PageSizeUnit = 'Inches'
         self.ScalebarInterval = 10
         self.ScalebarLabelX = None
         self.ScalebarLabelY = None
-        self.ScalebarPositioning = "Bottom Left"
+        self.ScalebarPositioning = 'Bottom Left'
         self.ScalebarHeight = .2
         self.ScalebarWidth = 6.0
         self.ScalebarSizeUnit = 'Inches'
@@ -22,8 +34,80 @@ class gmtMapOptions():
         self.SymbologyShape = 'Circle'
         self.SymbologySize = 4.0
         self.SymbologySizeUnit = 'Points'
-        self.SymbologyFillColor = qtg.QColor(0,0,0)
-        self.SymbologyBorderColor = qtg.QColor(0,0,0)
+        self.SymbologyFillColor = qtg.QColor(255,0,0)
+        self.SymbologyBorderColor = qtg.QColor(0,0,0) 
+
+    @property 
+    def MapClassificationAdd(self):
+        return self.__MapClassificationAdd
+    @MapClassificationAdd.setter 
+    def MapClassificationAdd(self, add):
+        self.__MapClassificationAdd = add 
+
+    @property 
+    def MapClassification(self):
+        return self.__MapClassification
+    @MapClassification.setter 
+    def MapClassification(self, classification):
+        self.__MapClassification = classification
+
+
+    @property
+    def MapClassificationOffsetX(self):
+        return self.__MapClassificationOffsetX 
+    @MapClassificationOffsetX.setter 
+    def MapClassificationOffsetX(self, offset):
+        self.__MapClassificationOffsetX = offset 
+
+    @property
+    def MapClassificationOffsetY(self):
+        return self.__MapClassificationOffsetY
+    @MapClassificationOffsetY.setter 
+    def MapClassificationOffsetY(self, offset):
+        self.__MapClassificationOffsetY = offset 
+
+    @property
+    def MapClassificationOffsetUnit(self):
+        return self.__MapClassificationOffsetUnit
+    @MapClassificationOffsetUnit.setter 
+    def MapClassificationOffsetUnit(self, unit):
+        self.__MapClassificationOffsetUnit = unit
+
+    @property 
+    def MapTitleAdd(self):
+        return self.__MapTitleAdd 
+    @MapTitleAdd.setter 
+    def MapTitleAdd(self, add):
+        self.__MapTitleAdd = add 
+
+    @property 
+    def MapTitle(self):
+        return self.__MapTitle
+    @MapTitle.setter 
+    def MapTitle(self, title):
+        self.__MapTitle = title
+
+    @property 
+    def MapTitleOffsetX(self):
+        return self.__MapTitleOffsetX
+    @MapTitleOffsetX.setter
+    def MapTitleOffsetX(self, offset):
+        self.__MapTitleOffsetX = offset
+    
+    @property 
+    def MapTitleOffsetY(self):
+        return self.__MapTitleOffsetY
+    @MapTitleOffsetY.setter
+    def MapTitleOffsetY(self, offset):
+        self.__MapTitleOffsetY = offset
+
+    @property 
+    def MapTitleOffsetUnit(self):
+        return self.__MapTitleOffsetUnit
+    @MapTitleOffsetUnit.setter
+    def MapTitleOffsetUnit(self, offset):
+        self.__MapTitleOffsetUnit = offset
+
 
     @property 
     def PageHeight(self):

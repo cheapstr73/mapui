@@ -135,3 +135,4 @@ dmypy.json
 
 #test output folder
 test_output/
+ref/

@@ -9,31 +9,40 @@ from PyQt5 import QtCore as qtc
 ###########################################################################################################################
 class ColorToolButton(qtw.QToolButton):
     #Class constructor...
-    def __init__(self, fill=qtg.QColor(0,0,0), border=qtg.QColor(0,0,0)):
+    def __init__(self, version, fill=qtg.QColor(255,0,0), border=qtg.QColor(255,0,0)):
         super(ColorToolButton, self).__init__()
         self.__CurrentFillColor  = fill
         self.__CurrentBorderColor = border 
+        self.version = version
 
         #Set up couple of icons to show in the drop menu
         self.fillIcon = qtg.QIcon('./support/icons/color2.png')
         self.borderIcon = qtg.QIcon('./support/icons/color3.png') 
 
         #Create a new menu and add menu actions..
-        menu = qtw.QMenu()       
-        self.chooseFillAction = qtw.QAction(self.fillIcon, "Choose Fill", self)
-        self.chooseBorderAction = qtw.QAction(self.borderIcon, "Choose Border", self)
-        menu.addAction(self.chooseFillAction)
-        menu.addAction(self.chooseBorderAction)
+        if self.version == 0:
+            menu = qtw.QMenu()       
+            self.chooseFillAction = qtw.QAction(self.fillIcon, "Choose Fill", self)
+            self.chooseBorderAction = qtw.QAction(self.borderIcon, "Choose Border", self)
+            menu.addAction(self.chooseFillAction)
+            menu.addAction(self.chooseBorderAction)
+            #Set the functions to call when the menu item is selected
+            self.chooseFillAction.triggered.connect(self.ChooseFillColor)
+            self.chooseBorderAction.triggered.connect(self.ChooseBorderColor)    
+            self.setPopupMode(qtw.QToolButton.MenuButtonPopup)
+            self.setMenu(menu)
+        else:
+            menu = qtw.QMenu()       
+            self.chooseFillAction = qtw.QAction(self.fillIcon, "Font Color", self) 
+            menu.addAction(self.chooseFillAction) 
+            self.chooseFillAction.triggered.connect(self.ChooseFillColor)  
+            self.setPopupMode(qtw.QToolButton.MenuButtonPopup)
+            self.setMenu(menu)
 
-        #Set the functions to call when the menu item is selected
-        self.chooseFillAction.triggered.connect(self.ChooseFillColor)
-        self.chooseBorderAction.triggered.connect(self.ChooseBorderColor)    
-        self.setPopupMode(qtw.QToolButton.MenuButtonPopup)
-        self.setMenu(menu)
 
         #Create a layout to draw the colored box in
         self.cLayout = qtw.QHBoxLayout()  
-        self.colorBox = ShowColor(self.__CurrentFillColor, self.__CurrentBorderColor)
+        self.colorBox = ShowColor(self.version, self.__CurrentFillColor, self.__CurrentBorderColor)
         self.cLayout.addWidget(self.colorBox)
         self.setLayout(self.cLayout)  
 
@@ -83,28 +92,38 @@ class ColorToolButton(qtw.QToolButton):
 
     def PaintColor(self):
         self.clearLayout(self.cLayout)
-        self.colorBox = ShowColor(self.getCurrentFillColor(), self.getCurrentBorderColor())
+        self.colorBox = ShowColor(self.version, self.getCurrentFillColor(), self.getCurrentBorderColor())
         self.cLayout.addWidget(self.colorBox)
 
 ###########################################################################################################################
 #This class is responsible for painting the rectangle on the button.
 ###########################################################################################################################
 class ShowColor(qtw.QWidget):
-    def __init__(self, newFillColor, newBorderColor):
+    def __init__(self, version, newFillColor, newBorderColor):
         super(ShowColor, self).__init__()
         self.newFillColor = newFillColor 
         self.newBorderColor = newBorderColor 
+        self.version = version
         self.update()
         
     def paintEvent(self, e):
         painter = qtg.QPainter()
         painter.begin(self)
-        self.__drawRectangle(painter)
+        if self.version == 0:
+            self.__drawRectangle(painter)
+        else:
+            self.__drawText(painter)
         painter.end()
 
     def __drawRectangle(self,p):
         p.setPen(self.newBorderColor)
         p.setBrush(self.newFillColor)
         p.drawRect(0,0,20,17) 
-    
+
+    def __drawText(self, p):
+        font = qtg.QFont()
+        font.setPixelSize(18)         
+        p.setFont(font)
+        p.setPen(self.newFillColor) 
+        p.drawText(5, 17, 'A')
         

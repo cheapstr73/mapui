@@ -30,7 +30,7 @@ class PaletteViewer(qtw.QWidget):
             self.__showMessage(1,"L Cannot find the settings file \'./.config/settings.txt\'")
  
         #Set the size of this widget
-        self.setFixedWidth(219)
+        self.setFixedWidth(227)
         self.setFixedHeight(35)
          
         #Create and set up the layout
@@ -252,7 +252,7 @@ class _PaintedPalette(qtw.QWidget):
         super(_PaintedPalette, self).__init__()
 
         self.setFixedHeight(19)
-        self.setFixedWidth(215)         
+        self.setFixedWidth(220)         
         self.lines = colorList
         self.opacity = opacity
         self.update()
@@ -267,7 +267,7 @@ class _PaintedPalette(qtw.QWidget):
         pos = 1 / len(self.lines)
         start = 0
 
-        lg = qtg.QLinearGradient(205, 0, 0.0, 0.0)
+        lg = qtg.QLinearGradient(215, 0, 0.0, 0.0)
 
         #We need to go from back to front to display the gradient in the correct order...    
         for line in reversed(self.lines):            
@@ -297,6 +297,6 @@ class _PaintedPalette(qtw.QWidget):
 
         qp.setPen(qtg.QColor(215,215,215))
         qp.setBrush(lg) 
-        rect = qtc.QRectF(0, 0, 205, 18.0)
+        rect = qtc.QRectF(0, 0, 215, 18.0)
         qp.drawRect(rect)
   

@@ -1,3 +1,4 @@
+
 class mapuiSettings():
     
     @staticmethod 
@@ -31,6 +32,7 @@ class mapuiSettings():
             'Points'
         ]   
         return units
+
     @staticmethod 
     def getScalebarPositioning():
         pos = [
@@ -47,6 +49,47 @@ class mapuiSettings():
         ]
         return pos
 
+    @staticmethod 
+    def getGMTFonts():
+        fonts = [
+            ["Helvetica", "0"],
+            ["Helvetica-Bold", "1"],
+            ["Helvetica-Oblique", "2"],
+            ["Helvetica-BoldOblique", "3"],
+            ["Times-Roman", "4"],
+            ["Times-Bold", "5"],
+            ["Times-Italic", "6"],
+            ["Times-BoldItalic", "7"],
+            ["Courier", "8"],
+            ["Courier-Bold", "9"],
+            ["Courier-Oblique", "10"],
+            ["Courier-BoldOblique", "11"],
+            ["Σψμβολ (Symbol)", "12"],
+            ["AvantGarde-Book", "13"],
+            ["AvantGarde-BookOblique", "14"],
+            ["AvantGarde-Demi", "15"],
+            ["AvantGarde-DemiOblique", "16"],
+            ["Bookman-Demi", "17"],
+            ["Bookman-DemiItalic", "18"],
+            ["Bookman-Light", "19"],
+            ["Bookman-LightItalic", "20"],
+            ["Helvetica-Narrow", "21"],
+            ["Helvetica-Narrow-Bold", "22"],
+            ["Helvetica-Narrow-Oblique", "23"],
+            ["Helvetica-Narrow-BoldOblique", "24"],
+            ["NewCenturySchlbk-Roman", "25"],
+            ["NewCenturySchlbk-Italic", "26"],
+            ["NewCenturySchlbk-Bold", "27"],
+            ["NewCenturySchlbk-BoldItalic", "28"],
+            ["Palatino-Roman", "29"],
+            ["Palatino-Italic", "30"],
+            ["Palatino-Bold", "31"],
+            ["Palatino-BoldItalic", "32"],
+            ["ZapfChancery-MediumItalic", "33"],
+            ["ZapfDingbats", "34"]
+        ]
+        return fonts
+        
     @staticmethod
     def getSymbols():
         symbols = [
