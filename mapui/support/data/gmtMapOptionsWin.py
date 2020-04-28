@@ -87,8 +87,8 @@ class mapUIOptions(qtw.QDialog):
         self.coastline_national_boundary_layout.addWidget(self.lcbtn_national_boundary)
         
         #Coastline River Data...
-        lcbtn_rivers = LineColorButton() 
-        self.coastline_river_color_layout.addWidget(lcbtn_rivers)
+        self.lcbtn_rivers = LineColorButton() 
+        self.coastline_river_color_layout.addWidget(self.lcbtn_rivers)
 
         self.combo_scalebar_position.currentIndexChanged.connect(self.comboPositionChanged)
         self.checkLevels()

@@ -17,7 +17,7 @@ class gmtMapScript():
             self.output_basename = gmtMap.FileOutput[gmtMap.FileOutput.rfind('/')+1:][:-3]
             self.output_directory = gmtMap.FileOutput[:gmtMap.FileOutput.rfind('/')+1:]
             self.output_ps = self.output_directory + '/' + self.output_basename + ".ps"
-            f = open(self.output_directory + '/' + self.output_basename + '.sh' , 'w')
+            f = open(self.output_directory + '/.' + self.output_basename + '.sh' , 'w')
             f.close()
         except Exception as e:
             q = qtw.QMessageBox()
@@ -70,7 +70,7 @@ class gmtMapScript():
     ###########################################################################################################################
     def createScript(self):        
         try:
-            with open(self.output_directory + '/' + self.output_basename + '.sh', 'a') as script:
+            with open(self.output_directory + '/.' + self.output_basename + '.sh', 'a') as script:
                 script.write("#!/bin/bash")
                 script.write('\n##########################################################################################')
                 script.write('\n#SET UP PATH REFERENCES')
@@ -80,16 +80,17 @@ class gmtMapScript():
                 script.write('\nbase_name=\"%s\"' % self.output_basename)
                 script.write('\ninput_file=\"%s\"' %self.__gmtMap.FileInput)
                 script.write('\nout_file=%s' % self.output_basename + '.ps')
-                script.write('\n##########################################################################################')
-                script.write('\n#DECLARE CLASSIFICATION INFO')
-                script.write('\n##########################################################################################')
-                script.write('\nclassification=%s' % self.__gmtMap.MapClassification.text)
-                script.write('\nclassification_font=%s' % self.__gmtMap.MapClassification.font)
-                script.write('\nclassification_font_size=%s' % self.__gmtMap.MapClassification.size)
-                script.write('\nclassification_color=%s' % self.convertColor(self.__gmtMap.MapClassification.color))
-                script.write('\nclassification_offset_x=%s' % self.__gmtMap.MapClassificationOffsetX)
-                script.write('\nclassification_offset_y=%s' % self.__gmtMap.MapClassificationOffsetY)
-                script.write('\nclassification_offset_unit=%s' % self.__gmtMap.MapClassificationOffsetUnit[:1].lower())
+                if self.__gmtMap.MapClassificationAdd:
+                    script.write('\n##########################################################################################')
+                    script.write('\n#DECLARE CLASSIFICATION INFO')
+                    script.write('\n##########################################################################################')
+                    script.write('\nclassification=%s' % self.__gmtMap.MapClassification.text)
+                    script.write('\nclassification_font=%s' % self.__gmtMap.MapClassification.font)
+                    script.write('\nclassification_font_size=%s' % self.__gmtMap.MapClassification.size)
+                    script.write('\nclassification_color=%s' % self.convertColor(self.__gmtMap.MapClassification.color))
+                    script.write('\nclassification_offset_x=%s' % self.__gmtMap.MapClassificationOffsetX)
+                    script.write('\nclassification_offset_y=%s' % self.__gmtMap.MapClassificationOffsetY)
+                    script.write('\nclassification_offset_unit=%s' % self.__gmtMap.MapClassificationOffsetUnit[:1].lower())
                 if self.__gmtMap.MapTitleAdd:
                     script.write('\n##########################################################################################')
                     script.write('\n#DECLARE MAP TITLE INFO')
@@ -140,7 +141,6 @@ class gmtMapScript():
                 script.write('\nscalebar_offset_x=%s' % self.__gmtMap.ScalebarOffsetX)
                 script.write('\nscalebar_offset_y=%s' % self.__gmtMap.ScalebarOffsetY)
                 script.write('\nscalebar_offset_unit=%s' % self.__gmtMap.ScalebarOffsetUnit[:1].lower())
-
                 script.write('\n##########################################################################################')
                 script.write('\n#DECLARE MAP SYMBOLOGY SETTINGS')
                 script.write('\n##########################################################################################')
@@ -157,6 +157,8 @@ class gmtMapScript():
                 rivers = self.getRiverTypeCode(self.__gmtMap.CoastlineRiverType)
                 if rivers != '-1':
                     script.write('\nriver_type=%s' % rivers)
+                    script.write('\nriver_color=%s' % self.convertColor(self.__gmtMap.CoastlineRiverColor))
+                    script.write('\nriver_weight=%s' % self.__gmtMap.CoastlineRiverWeight)
 
                 script.write('\n##########################################################################################')
                 script.write('\n#END VARIABLE DECLARATIONS  | DO NOT ALTER CODE BEYOND THIS POINT')
@@ -182,19 +184,11 @@ class gmtMapScript():
                 script.write('\necho Creating Coastlines...')
                 #Add rivers
                 if rivers  != '-1':
-                    script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,${coast_border_color} -G${coast_fill_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -I${river_type} -K  -V > ${out_file}')
+                    script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,${coast_border_color} -G${coast_fill_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -I${river_type}/${river_weight}p,${river_color} -Xc -Yc  -K  -V > ${out_file}')
                 #Don't add rivers
                 else:
-                    script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,${coast_border_color} -G${coast_fill_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -K -V > ${out_file}')
+                    script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,${coast_border_color} -G${coast_fill_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -Xc -Yc -K -V > ${out_file}')
                 
-
-                script.write('\n\n##########################################################################################')
-                script.write('\n#CREATE A BASE LAYER FOR PROJECTED DATA')
-                script.write('\n##########################################################################################')
-                script.write('\necho Creating Basemap...')
-                script.write('\ngmt psbasemap -R${RLL} -J${projection} -B${ln}g${ln}/${lt}g${lt}:.\"${map_title}\": -Xci -Yci -K -O -V >> ${out_file}')
-
-
                 script.write('\n\n##########################################################################################')
                 script.write('\n#PLOT THE XY DATA FROM THE INPUT FILE')
                 script.write('\n##########################################################################################')
@@ -207,9 +201,15 @@ class gmtMapScript():
                     script.write('\ngmt psxy ${input_file} -R${RLL} -J${projection} -C${output_cpt} -S${symbol}${symbol_size}${symbol_size_unit} -W.05,gray50 -O -K -V >> ${out_file}')
                 else:
                     script.write('\ngmt psxy ${input_file} -R${RLL} -J${projection}  -S${symbol}${symbol_size}${symbol_size_unit} -W.05,${symbol_border_color} -G${symbol_fill_color} -O -K -V >> ${out_file}')
+                    
+                script.write('\n\n##########################################################################################')
+                script.write('\n#CREATE A BASE LAYER FOR PROJECTED DATA')
+                script.write('\n##########################################################################################')
+                script.write('\necho Creating Basemap...')
+                script.write('\ngmt psbasemap -R${RLL} -J${projection} -B${ln}g${ln}/${lt}g${lt}:.\"${map_title}\": -Xc -Yc -K -O -V >> ${out_file}')
 
                 #Place the classification if needed....
-                if self.__gmtMap.MapClassification:
+                if self.__gmtMap.MapClassificationAdd:
                     script.write('\n\n##########################################################################################')
                     script.write('\n#ADD THE MAP CLASSSIFICATION AT THE TOP')
                     script.write('\n##########################################################################################')
@@ -236,6 +236,8 @@ class gmtMapScript():
 
                 if not self.__gmtMap.ScalebarLabelX and not self.__gmtMap.ScalebarLabelY:
                     script.write(' -Bx${scalebar_interval}${scale_units} ')
+                if self.__gmtMap.ScalebarIlluminate:
+                    script.write(' -I ')
                 script.write(' -R${RLL} -J${projection}  -O -V >> ${out_file}')
                 
 

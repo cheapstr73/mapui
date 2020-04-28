@@ -253,23 +253,6 @@ class mainWin(qtw.QDialog):
     def toggleFormat(self, filetype):
         self.convertFormat = filetype
 
-    """def toggleEPS(self):
-        self.convertFormats.append('e') if self.epsAction.isChecked() else self.convertFormats.remove('e')
-    def togglePDF(self):
-        self.convertFormats.append('f') if self.pdfAction.isChecked() else self.convertFormats.remove('f')
-    def toggleJPG(self):
-        self.convertFormats.append('j') if self.jpgAction.isChecked() else self.convertFormats.remove('j')
-    def togglePNG(self):
-        self.convertFormats.append('g') if self.pngAction.isChecked() else self.convertFormats.remove('g')
-    def togglePNGT(self):
-        self.convertFormats.append('G') if self.pngTAction.isChecked() else self.convertFormats.remove('G')
-    def togglePPM(self):
-        self.convertFormats.append('m') if self.ppmAction.isChecked() else self.convertFormats.remove('m')
-    def toggleSVG(self):
-        self.convertFormats.append('s') if self.svgAction.isChecked() else self.convertFormats.remove('s')
-    def toggleTIFF(self):
-        self.convertFormats.append('t') if self.tiffAction.isChecked() else self.convertFormats.remove('t')"""
-
     ###########################################################################################################################
     #Show the main options window
     ###########################################################################################################################
@@ -337,19 +320,25 @@ class mainWin(qtw.QDialog):
                 col1.sort()
                 col2.sort()
                 col3.sort()
-
+                #Set min/max longitude values
                 self.FileMinLong = col0[0]
                 self.FileMaxLong = col0[-1]
+                #Set min/max latitude values
                 self.FileMinLat = col1[0]
                 self.FileMaxLat = col1[-1]
+                #Set min/max cpt range values
                 self.FileMinRange = col2[0]
                 self.FileMaxRange = col2[-1] 
+                #Set min/max size values (column 4 of the input file)
                 self.FileMaxSize = col3[0]
                 self.FileMaxSize = col3[-1]
+                #Shouldn't be needed, but just to be on the safe side...
                 col0 = None
                 col1 = None
                 col2 = None
                 col3 = None
+
+                #Set the hint labels with the apprirate text values...
                 self.lbl_east.setText(str(self.FileMinLong))
                 self.lbl_west.setText(str(self.FileMaxLong))
                 self.lbl_south.setText(str(self.FileMinLat))
@@ -479,6 +468,7 @@ class mainWin(qtw.QDialog):
         self.gmtMap.ScalebarPosUnit = self.options.combo_scalebar_pos_unit.currentText()
         self.gmtMap.ScalebarLabelX = self.options.txt_scalebar_label_x.text().strip()
         self.gmtMap.ScalebarLabelY = self.options.txt_scalebar_label_y.text().strip()
+        self.gmtMap.ScalebarIlluminate = self.options.chk_illuminate.isChecked()
         self.gmtMap.SymbologyShape = self.options.combo_symbols.currentText()
         self.gmtMap.SymbologySize = self.options.spin_symbology_size.value()
         self.gmtMap.SymbologySizeUnit = self.options.combo_symbology_size_unit.currentText()
@@ -486,11 +476,12 @@ class mainWin(qtw.QDialog):
         self.gmtMap.SymbologyBorderColor = self.options.cbtn_symbology_fill.getCurrentBorderColor()
         self.gmtMap.CoastlineFillColor = self.options.cbtn_coastlines_fill.getCurrentFillColor()
         self.gmtMap.CoastlineBorderColor = self.options.cbtn_coastlines_fill.getCurrentBorderColor()
-        #self.gmtMap.CoastlineNationalBoundaryColor = self.options.getCoastlineNationalBoundaryColor()
         self.gmtMap.CoastlineNationalBoundaryType = self.options.combo_coastline_national_boundary_type.currentText()
         self.gmtMap.CoastlineNationalBoundaryColor = self.options.lcbtn_national_boundary.getCurrentLineColor()
         self.gmtMap.CoastlineNationalBoundaryWeight = self.options.lcbtn_national_boundary.getCurrentLineWeight()
         self.gmtMap.CoastlineRiverType = self.options.combo_coastline_river_type.currentText()
+        self.gmtMap.CoastlineRiverColor = self.options.lcbtn_rivers.getCurrentLineColor()
+        self.gmtMap.CoastlineRiverWeight = self.options.lcbtn_rivers.getCurrentLineWeight()
         #Package the output types..
         self.gmtMap.ConvertTypes = self.convertFormat
          
@@ -586,6 +577,7 @@ class mainWin(qtw.QDialog):
         self.options.combo_scalebar_pos_unit.setCurrentText(self.gmtMap.ScalebarPosUnit)
         self.options.txt_scalebar_label_x.setText(self.gmtMap.ScalebarLabelX)
         self.options.txt_scalebar_label_y.setText(self.gmtMap.ScalebarLabelY)
+        self.options.chk_illuminate.setChecked(self.gmtMap.ScalebarIlluminate)
         self.options.combo_symbols.setCurrentText(self.gmtMap.SymbologyShape)
         self.options.spin_symbology_size.setValue(self.gmtMap.SymbologySize)
         self.options.combo_symbology_size_unit.setCurrentText(self.gmtMap.SymbologySizeUnit)
@@ -593,16 +585,16 @@ class mainWin(qtw.QDialog):
         self.options.cbtn_symbology_fill.setCurrentBorderColor(self.gmtMap.SymbologyBorderColor) 
         self.options.cbtn_coastlines_fill.setCurrentFillColor(self.gmtMap.CoastlineFillColor)
         self.options.cbtn_coastlines_fill.setCurrentBorderColor(self.gmtMap.CoastlineBorderColor)
-        self.options.combo_coastline_national_boundary_type.setCurrentText(self.gmtMap.CoastlineNationalBoundaryType)
-        #self.options.setCoastlineNationalBoundaryColor(self.gmtMap.CoastlineNationalBoundaryColor)
+        self.options.combo_coastline_national_boundary_type.setCurrentText(self.gmtMap.CoastlineNationalBoundaryType) 
         self.options.lcbtn_national_boundary.setCurrentLineColor(self.gmtMap.CoastlineNationalBoundaryColor)
         self.options.lcbtn_national_boundary.setCurrentLineWeight(self.gmtMap.CoastlineNationalBoundaryWeight)
         self.options.combo_coastline_river_type.setCurrentText(self.gmtMap.CoastlineRiverType)
-
+        self.options.lcbtn_rivers.setCurrentLineColor(self.gmtMap.CoastlineRiverColor)
+        self.options.lcbtn_rivers.setCurrentLineWeight(self.gmtMap.CoastlineRiverWeight)
     def executeScript(self):
         self.createMapObject()  
         gmtMapScript(self.gmtMap)
-        cmd = "cd \'" +  path.split(self.gmtMap.FileOutput)[0] + "\' && sh " + path.split(self.gmtMap.FileOutput)[1][:-3] + '.sh'                  
+        cmd = "cd \'" +  path.split(self.gmtMap.FileOutput)[0] + "\' && sh ." + path.split(self.gmtMap.FileOutput)[1][:-3] + '.sh'                  
         system(cmd)
         self.showMessage(1, "", "Process Completed!")
 

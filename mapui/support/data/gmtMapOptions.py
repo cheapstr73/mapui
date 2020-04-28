@@ -30,6 +30,7 @@ class gmtMapOptions():
         self.ScalebarYPos = .6
         self.ScalebarPosUnit = 'Inches'
         self.ScalebarOrientation = 'h'
+        self.ScalebarIlluminate = False
         self.SymbologyLevel = 0
         self.SymbologyShape = 'Circle'
         self.SymbologySize = 4.0
@@ -42,6 +43,8 @@ class gmtMapOptions():
         self.CoastlineNationalBoundaryWeight = 1
         self.CoastlineNationalBoundaryType = 'National Boundaries'
         self.CoastlineRiverType = 'None'
+        self.CoastlineRiverColor = qtg.QColor(174,211,239)
+        self.CoastlineRiverWeight = .5
 
     @property
     def CoastlineFillColor(self):
@@ -86,6 +89,20 @@ class gmtMapOptions():
         self.__CoastlineRiverType = tp
 
     @property 
+    def CoastlineRiverColor(self):
+        return self.__CoastlineRiverColor 
+    @CoastlineRiverColor.setter 
+    def CoastlineRiverColor(self, color):
+        self.__CoastlineRiverColor = color 
+
+    @property 
+    def CoastlineRiverWeight(self):
+        return self.__CoastlineRiverWeight 
+    @CoastlineRiverWeight.setter 
+    def CoastlineRiverWeight(self, w):
+        self.__CoastlineRiverWeight = w
+
+    @property 
     def MapClassificationAdd(self):
         return self.__MapClassificationAdd
     @MapClassificationAdd.setter 
@@ -98,7 +115,6 @@ class gmtMapOptions():
     @MapClassification.setter 
     def MapClassification(self, classification):
         self.__MapClassification = classification
-
 
     @property
     def MapClassificationOffsetX(self):
@@ -156,7 +172,6 @@ class gmtMapOptions():
     def MapTitleOffsetUnit(self, offset):
         self.__MapTitleOffsetUnit = offset
 
-
     @property 
     def PageHeight(self):
         return self.__PageHeight
@@ -205,6 +220,13 @@ class gmtMapOptions():
     @ScalebarHeight.setter 
     def ScalebarHeight(self, height):
         self.__ScalebarHeight = height 
+
+    @property 
+    def ScalebarIlluminate(self):
+        return self.__ScalebarIlluminate 
+    @ScalebarIlluminate.setter 
+    def ScalebarIlluminate(self, i):
+        self.__ScalebarIlluminate = i
 
     @property 
     def ScalebarSizeUnit(self):

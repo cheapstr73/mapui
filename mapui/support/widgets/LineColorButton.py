@@ -31,7 +31,7 @@ class LineColorButton(qtw.QToolButton):
         self.layout.addLayout(self.spinLayout)
 
         self.setLayout(self.layout)
-        self.setFixedWidth(100) 
+        self.setFixedWidth(110) 
         self.setCurrentLineColor(color)
 
     def valueChanged(self):
@@ -93,7 +93,8 @@ class ShowColor(qtw.QWidget):
 
     def __drawRectangle(self,p):
         pen = qtg.QPen(self.newBorderColor)
-        pen.setWidth(self.width)
+        #Exagerate the width for display puposes...
+        pen.setWidth(self.width * 1.5)
         p.setPen(pen)
         p.setBrush(self.newBorderColor)
-        p.drawLine(5,10,37,10)
+        p.drawLine(5,10,45,10)
