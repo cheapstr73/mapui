@@ -1,2 +1,2 @@
 # mapui
-![User Interface](/mapui/support/images/ui.png)
+![User Interface](/mapui/support/images/interface.png)
