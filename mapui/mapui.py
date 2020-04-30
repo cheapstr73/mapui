@@ -294,13 +294,14 @@ class mainWin(qtw.QDialog):
         self.viewPalette()
 
     ###########################################################################################################################
-    #Read the first line of the input file and determine how many columns it contains.
+    #Read the input file. It should only be plain text with 4 columns (Longitude, Latitude, and 2 other columns containing
+    #numerical data). While reading, split the file into 4 lists, sort them, and return the min and max values for each column.
+    #These values will be displayed on the UI to give the user the numerical 'bounds' of the file.
     ###########################################################################################################################    
     def analyzeInput(self, input):
         try:
             with open(input, 'r') as f:
                 lines = f.readlines()
-
                 #Create 4 empty lists so we can fill each list with contents of each column...
                 col0, col1, col2, col3 = ([] for i in range(4))  
                 for line in lines:
@@ -345,7 +346,7 @@ class mainWin(qtw.QDialog):
                 col2 = None
                 col3 = None
 
-                #Set the hint labels with the apprirate text values...
+                #Set the hint labels with the appropriate text values...
                 self.lbl_east.setText(str(self.FileMinLong))
                 self.lbl_west.setText(str(self.FileMaxLong))
                 self.lbl_south.setText(str(self.FileMinLat))
@@ -353,8 +354,7 @@ class mainWin(qtw.QDialog):
                 self.lbl_min.setText(str(self.FileMinRange))
                 self.lbl_max.setText(str(self.FileMaxRange))
                 self.btn_fill_defaults.setEnabled(True)
-        except:
-            #self.showMessage(1, '', str(e))
+        except: 
             self.showMessage(3,'Unknown Format', 'There are problems with the format of this file.\nProcessing this file may produce unexpected results.')
     
     def populateDefaults(self):
@@ -401,7 +401,7 @@ class mainWin(qtw.QDialog):
         self.viewer.DrawPalette(cpt, alpha)
 
     ###########################################################################################################################
-    #This will save the interface parameters and options to a gmtMap object
+    #This will save the interface parameters and options to a gmtMap object. The values will come from each UI control.
     ########################################################################################################################### 
     def createMapObject(self):
         ################################################################################
@@ -649,7 +649,11 @@ class mainWin(qtw.QDialog):
             self.lbl_projection.setText(self.gmtMap.Projection.Name)
         else:
             self.lbl_projection.setText("No map projection selected...")
-            
+   
+    ###########################################################################################################################
+    #This will execute the shell script. This is only for testing purposes. This is a placeholder until a more 'robust' 
+    #procedure is written
+    ###########################################################################################################################         
     def executeScript(self):
         self.createMapObject()  
         gmtMapScript(self.gmtMap)
@@ -657,13 +661,17 @@ class mainWin(qtw.QDialog):
         system(cmd)
         self.showMessage(1, "", "Process Completed!")
 
+    ###########################################################################################################################
+    #Testing function....this will go away in the end...
+    ########################################################################################################################### 
     def showMessage(self, icon, title, str):
         m = qtw.QMessageBox(self)  
         m.setIcon(icon)
         m.setWindowTitle(title)
         m.setText(str) 
         m.exec()
-
+    
+    #Add a few properties for the UI.
     @property
     def FileMinLong(self):
         return self.__FileMinLong
