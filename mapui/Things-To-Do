@@ -1,5 +1,0 @@
-Change Map frame settings (border, gridlines, grid number, etc)
-Set custom coast data line widths...
-Figure out why a few x/y locations are symbolized outside of the set .cpt range (are they falling under B,F,N categories???)
-Double check all input left/right limits (validation)
-

@@ -20,8 +20,8 @@ class gmtMapOptions():
         self.ScalebarLabelX = None
         self.ScalebarLabelY = None
         self.ScalebarPositioning = 'Bottom Left'
-        self.ScalebarHeight = .2
-        self.ScalebarWidth = 6.0
+        self.ScalebarHeight = .15
+        self.ScalebarWidth = 5.0
         self.ScalebarSizeUnit = 'Inches'
         self.ScalebarOffsetUnit = 'Inches'
         self.ScalebarOffsetX = 1.0

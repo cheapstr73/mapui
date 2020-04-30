@@ -5,6 +5,10 @@ class mapuiSettings():
     def getGMTPath():
         return "/usr/share/gmt/"
 
+    @staticmethod 
+    def getWidthScalingFactor():
+        return .9
+    
     @staticmethod
     def getVerbosity():
         levels = [

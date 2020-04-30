@@ -14,7 +14,9 @@ from support.data.gmtFont import gmtFont
 from support.data.gmtMap import gmtMap
 from support.widgets.ColorPaletteViewer import PaletteViewer
 from support.data.gmtMapScript import gmtMapScript
-from support.data.gmtMapOptionsWin import mapUIOptions
+from support.data.gmtProjection import gmtProjection
+from support.view.gmtMapOptionsWin import mapUIOptions
+from support.view.gmtProjectionWin import gmtProjectionWin 
 import sys
 import pickle
 import re
@@ -29,12 +31,16 @@ class mainWin(qtw.QDialog):
         #CHANGE BACK TO USER HOME DIR WHEN DONE TESTING...
         self.currentDir = "/mnt/566A02716A024E65/MAPUI-BACKUP/GitHub/mapui/"
 
+        #Fix the window dimensions
+        self.setFixedWidth(510)
+        self.setFixedHeight(630)
+
         #Decare the icons to be used...
         self.windowIcon = qtg.QIcon('./support/icons/map7.png')
         self.populateIcon = qtg.QIcon('./support/icons/fill1')
         self.saveIcon = qtg.QIcon('./support/icons/save4.png')
         self.openIcon = qtg.QIcon('./support/icons/open-file.png')
-        self.projectionIcon = qtg.QIcon('./support/icons/globe1.png')
+        self.projectionIcon = qtg.QIcon('./support/icons/globe2.png')
         self.loadIcon = qtg.QIcon('./support/icons/open3.png')
         self.optionsIcon = qtg.QIcon('./support/icons/options10.png')
         self.helpIcon = qtg.QIcon('./support/icons/help1.png')
@@ -46,6 +52,7 @@ class mainWin(qtw.QDialog):
         
         #Create the options window
         self.options = mapUIOptions(self)
+        self.projections = gmtProjectionWin(self) 
         self.setupInterface()
 
         #Poplate the form 
@@ -76,7 +83,7 @@ class mainWin(qtw.QDialog):
         self.setWindowIcon(self.windowIcon)
         self.btn_file_input.setIcon(self.openIcon)
         self.btn_fill_defaults.setIcon(self.populateIcon)
-        self.btn_select_projection.setIcon(self.projectionIcon)
+        self.btn_set_projection.setIcon(self.projectionIcon)        
         self.btn_save.setIcon(self.saveIcon)
         self.btn_load.setIcon(self.loadIcon)
         self.btn_options.setIcon(self.optionsIcon)
@@ -86,6 +93,7 @@ class mainWin(qtw.QDialog):
         #Set button cursors
         self.btn_file_input.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
         self.btn_fill_defaults.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
+        self.btn_set_projection.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
 
         #Add signals to the slots 
         self.combo_cpt.currentIndexChanged.connect(self.viewPalette)   
@@ -97,6 +105,9 @@ class mainWin(qtw.QDialog):
         self.btn_load.clicked.connect(self.loadParameters)
         self.btn_options.clicked.connect(self.openOptions)
         self.btn_execute.clicked.connect(self.executeScript)
+        self.projections.submitted.connect(self.lbl_projection.setText)        
+        self.btn_set_projection.clicked.connect(self.openProjections)
+
 
         #Populate the combo boxes with associated values
         self.combo_cpt.addItems(self.populateCPTComboBox())
@@ -111,16 +122,6 @@ class mainWin(qtw.QDialog):
         self.txt_cpt_min.setValidator(qtg.QDoubleValidator())
         self.txt_cpt_max.setValidator(qtg.QDoubleValidator())
         self.txt_cpt_interval.setValidator(qtg.QIntValidator())
-
-        #Fill the map projections combo box...
-        projections = mapuiSettings.getProjections()
-        for i in range(len(projections)):
-            if projections[i].startswith('[GRP]'):               
-                self.addGroupHeader(self.combo_projections, i, projections[i][5:])
-                
-            else:
-                self.combo_projections.addItem(projections[i])
-        self.combo_projections.setCurrentIndex(1)
         
         #self.txt_file_open.setFocus()
         self.lbl_slider_value.setText(str(self.slider_opacity.value()) + "%")
@@ -129,6 +130,7 @@ class mainWin(qtw.QDialog):
         self.btn_execute.setEnabled(False)
         self.monitorControls()
         self.lockExecute()
+                
 
     def centerInterface(self):
         pass
@@ -144,6 +146,7 @@ class mainWin(qtw.QDialog):
         self.txt_cpt_interval.textChanged.connect(self.lockExecute)
         self.combo_cpt_unit.currentIndexChanged.connect(self.lockExecute)
         self.txt_file_output.textChanged.connect(self.lockExecute)
+        self.projections.submitted.connect(self.lockExecute)
 
     def lockExecute(self):
         if (not self.txt_file_input.text() or 
@@ -155,7 +158,8 @@ class mainWin(qtw.QDialog):
         not self.txt_cpt_max.text() or
         not self.txt_cpt_interval.text() or
         not self.combo_cpt_unit.currentText() or
-        not self.txt_file_output.text()
+        not self.txt_file_output.text() or
+        not self.lbl_projection.text()
         ):
             self.btn_execute.setEnabled(False)
             return
@@ -259,6 +263,9 @@ class mainWin(qtw.QDialog):
     def openOptions(self):        
         self.options.show()
 
+    def openProjections(self):       
+        self.projections.show()
+            
     ###########################################################################################################################
     #Most GMT installations seem to intstall different .cpt files depending on the distro being used; so I do not want to load
     #the combo box with 'static' .cpt filenames. Rather, pull the list of .cpt's from the GMT install directory.
@@ -346,7 +353,7 @@ class mainWin(qtw.QDialog):
                 self.lbl_min.setText(str(self.FileMinRange))
                 self.lbl_max.setText(str(self.FileMaxRange))
                 self.btn_fill_defaults.setEnabled(True)
-        except Exception as e:
+        except:
             #self.showMessage(1, '', str(e))
             self.showMessage(3,'Unknown Format', 'There are problems with the format of this file.\nProcessing this file may produce unexpected results.')
     
@@ -357,21 +364,6 @@ class mainWin(qtw.QDialog):
         self.txt_north.setText(str(self.FileMaxLat))
         self.txt_cpt_min.setText(str(self.FileMinRange))
         self.txt_cpt_max.setText(str(self.FileMaxRange))
-    
-    ###########################################################################################################################
-    #This will add a group header to the (projections)combo box. The effect will mimic the 'optgroup' that you see in an HTML 
-    #select tag. This is not a default behavior in QT, so we have to improvise.
-    ###########################################################################################################################
-    def addGroupHeader(self, combo, row, str):
-        item = qtg.QStandardItem(str)
-        item.setFlags(item.flags() ^ (qtc.Qt.ItemIsSelectable)) 
-
-        font = item.font()
-        font.setBold(True)  
-        item.setFont(font)
-        
-        itemModel = combo.model()
-        itemModel.insertRow(row, item)
     
     ###########################################################################################################################
     #This will call a QFileDialog in order to select the input file
@@ -386,10 +378,10 @@ class mainWin(qtw.QDialog):
             return
 
     ###########################################################################################################################
-    #This will call a QFileDialog in order to select the input file
+    #This will call a QFileDialog in order to select the output file
     ###########################################################################################################################       
-    def outputFile(self):
-        file = qtw.QFileDialog().getSaveFileName(self, 'Output File', self.currentDir, "Postscript Files (*.ps)" )[0]
+    def outputFile(self): 
+        file = qtw.QFileDialog().getSaveFileName(self, 'Output File', self.currentDir, "Postscript Files (*.ps)" )[0] 
         if file:
             self.txt_file_output.setText(str(file))
             self.currentDir = path.split(file)[0]             
@@ -412,76 +404,107 @@ class mainWin(qtw.QDialog):
     #This will save the interface parameters and options to a gmtMap object
     ########################################################################################################################### 
     def createMapObject(self):
+        ################################################################################
+        #Main Form UI - ...only a handful of items here.
+        ################################################################################ 
         self.gmtMap.FileInput = self.txt_file_input.text().strip()
+        
+        #Region of Interest
         self.gmtMap.ROINorth = self.txt_north.text().strip()
         self.gmtMap.ROISouth = self.txt_south.text().strip()
         self.gmtMap.ROIEast = self.txt_east.text().strip()
-        self.gmtMap.ROIWest = self.txt_west.text().strip()
+        self.gmtMap.ROIWest = self.txt_west.text().strip()        
+        
+        #Color Palette Table
         self.gmtMap.CPTFile = self.combo_cpt.currentText()
         self.gmtMap.Opacity = self.slider_opacity.value()         
         self.gmtMap.CPTMinValue = self.txt_cpt_min.text().strip()
         self.gmtMap.CPTMaxValue = self.txt_cpt_max.text().strip()
         self.gmtMap.CPTInterval = self.txt_cpt_interval.text().strip()
-        self.gmtMap.ScaleUnit = self.combo_cpt_unit.currentText() 
-        self.gmtMap.Projection = self.combo_projections.currentText()
+        self.gmtMap.ScaleUnit = self.combo_cpt_unit.currentText()  
+        
+        #File Output
         self.gmtMap.FileOutput = self.txt_file_output.text().strip()
 
-        #Get the properties from the options window...
+        ################################################################################
+        #Advanced options window - Map tab
+        ################################################################################
         self.gmtMap.PageHeight = self.options.spin_page_height.value()
         self.gmtMap.PageWidth = self.options.spin_page_width.value()
-        self.gmtMap.MapClassificationAdd = self.options.chk_add_map_classification.isChecked()
-    
-        self.gmtMap.MapClassification = gmtFont(self.options.combo_map_classification_font.currentText(), self.options.spin_map_classification_font_size.value(), self.options.getMapClassificationColor(), self.options.txt_map_classification.text().strip())
+        self.gmtMap.PageSizeUnit = self.options.combo_page_size_unit.currentText()   
         
-        self.gmtMap.MapClassificationOffsetX = self.options.spin_map_classsification_offset_x.value()
-        self.gmtMap.MapClassificationOffsetY = self.options.spin_map_classsification_offset_y.value()
-        self.gmtMap.MapClassificationOffsetUnit = self.options.combo_map_classification_offset_unit.currentText()
-        self.gmtMap.MapTitleAdd = self.options.chk_add_map_title.isChecked() 
-
-        self.gmtMap.MapTitle = gmtFont(self.options.combo_map_title_font.currentText(), self.options.spin_map_title_font_size.value(), self.options.getMapTitleColor(), self.options.txt_map_title.text().strip())
-        
-        self.gmtMap.MapTitleFontSize = self.options.spin_map_title_font_size.value()
-
+        #Map Title
+        self.gmtMap.MapTitleAdd = self.options.chk_add_map_title.isChecked()    
+        self.gmtMap.MapTitle = gmtFont(self.options.combo_map_title_font.currentText(), 
+                                       self.options.spin_map_title_font_size.value(), 
+                                       self.options.getMapTitleColor(), 
+                                       self.options.txt_map_title.text().strip())       
         self.gmtMap.MapTitleOffsetX = self.options.spin_map_title_offset_x.value()
         self.gmtMap.MapTitleOffsetY = self.options.spin_map_title_offset_y.value()
         self.gmtMap.MapTitleOffsetUnit = self.options.combo_map_title_offset_unit.currentText()
-        self.gmtMap.PageSizeUnit = self.options.combo_page_size_unit.currentText()
         
-        if self.options.radio_symlevel0.isChecked():
+        self.gmtMap.MapClassificationAdd = self.options.chk_add_map_classification.isChecked()    
+        self.gmtMap.MapClassification = gmtFont(self.options.combo_map_classification_font.currentText(), 
+                                                self.options.spin_map_classification_font_size.value(), 
+                                                self.options.getMapClassificationColor(), 
+                                                self.options.txt_map_classification.text().strip())
+        self.gmtMap.MapClassificationOffsetX = self.options.spin_map_classsification_offset_x.value()
+        self.gmtMap.MapClassificationOffsetY = self.options.spin_map_classsification_offset_y.value()
+        self.gmtMap.MapClassificationOffsetUnit = self.options.combo_map_classification_offset_unit.currentText()
+        #self.gmtMap.MapTitleFontSize = self.options.spin_map_title_font_size.value()
+        
+        ################################################################################
+        #Advanced options window - Symbology tab
+        ################################################################################           
+        if self.options.radio_symlevel0.isChecked(): #The 3 symbology levels
             self.gmtMap.SymbologyLevel = 0
         elif self.options.radio_symlevel1.isChecked():
             self.gmtMap.SymbologyLevel = 1
         else:
             self.gmtMap.SymbologyLevel = 2 
-
-        self.gmtMap.ScalebarInterval = self.options.spin_scalebar_interval.value()
-        self.gmtMap.ScalebarOrientation = 'h' if self.options.radio_horizontal.isChecked() else 'v'  
-        self.gmtMap.ScalebarPositioning = self.options.combo_scalebar_position.currentText()      
-        self.gmtMap.ScalebarHeight = self.options.spin_scalebar_height.value()
-        self.gmtMap.ScalebarWidth = self.options.spin_scalebar_width.value()
-        self.gmtMap.ScalebarSizeUnit = self.options.combo_scalebar_size_unit.currentText()
-        self.gmtMap.ScalebarXPos = self.options.spin_scalebar_x.value()
-        self.gmtMap.ScalebarYPos = self.options.spin_scalebar_y.value()
-        self.gmtMap.ScalebarOffsetX = self.options.spin_scalebar_offset_x.value()
-        self.gmtMap.ScalebarOffsetY = self.options.spin_scalebar_offset_y.value()
-        self.gmtMap.ScalebarOffsetUnit = self.options.combo_scalebar_offset_unit.currentText()
-        self.gmtMap.ScalebarPosUnit = self.options.combo_scalebar_pos_unit.currentText()
-        self.gmtMap.ScalebarLabelX = self.options.txt_scalebar_label_x.text().strip()
-        self.gmtMap.ScalebarLabelY = self.options.txt_scalebar_label_y.text().strip()
-        self.gmtMap.ScalebarIlluminate = self.options.chk_illuminate.isChecked()
         self.gmtMap.SymbologyShape = self.options.combo_symbols.currentText()
-        self.gmtMap.SymbologySize = self.options.spin_symbology_size.value()
-        self.gmtMap.SymbologySizeUnit = self.options.combo_symbology_size_unit.currentText()
         self.gmtMap.SymbologyFillColor = self.options.cbtn_symbology_fill.getCurrentFillColor()
         self.gmtMap.SymbologyBorderColor = self.options.cbtn_symbology_fill.getCurrentBorderColor()
+        self.gmtMap.SymbologySize = self.options.spin_symbology_size.value()
+        self.gmtMap.SymbologySizeUnit = self.options.combo_symbology_size_unit.currentText()
+        
+        #Coastline Data
         self.gmtMap.CoastlineFillColor = self.options.cbtn_coastlines_fill.getCurrentFillColor()
-        self.gmtMap.CoastlineBorderColor = self.options.cbtn_coastlines_fill.getCurrentBorderColor()
+        self.gmtMap.CoastlineBorderColor = self.options.cbtn_coastlines_fill.getCurrentBorderColor() 
         self.gmtMap.CoastlineNationalBoundaryType = self.options.combo_coastline_national_boundary_type.currentText()
         self.gmtMap.CoastlineNationalBoundaryColor = self.options.lcbtn_national_boundary.getCurrentLineColor()
         self.gmtMap.CoastlineNationalBoundaryWeight = self.options.lcbtn_national_boundary.getCurrentLineWeight()
         self.gmtMap.CoastlineRiverType = self.options.combo_coastline_river_type.currentText()
         self.gmtMap.CoastlineRiverColor = self.options.lcbtn_rivers.getCurrentLineColor()
         self.gmtMap.CoastlineRiverWeight = self.options.lcbtn_rivers.getCurrentLineWeight()
+        
+        ################################################################################
+        #Advanced options window - Scalebar tab
+        ################################################################################    
+        self.gmtMap.ScalebarOrientation = 'h' if self.options.radio_horizontal.isChecked() else 'v'     
+        self.gmtMap.ScalebarHeight = self.options.spin_scalebar_height.value()
+        self.gmtMap.ScalebarWidth = self.options.spin_scalebar_width.value()
+        self.gmtMap.ScalebarSizeUnit = self.options.combo_scalebar_size_unit.currentText()
+        
+        #Positioning
+        self.gmtMap.ScalebarPositioning = self.options.combo_scalebar_position.currentText()  
+        self.gmtMap.ScalebarXPos = self.options.spin_scalebar_x.value()
+        self.gmtMap.ScalebarYPos = self.options.spin_scalebar_y.value()       
+        self.gmtMap.ScalebarPosUnit = self.options.combo_scalebar_pos_unit.currentText()        
+        self.gmtMap.ScalebarInterval = self.options.spin_scalebar_interval.value()  
+        self.gmtMap.ScalebarOffsetX = self.options.spin_scalebar_offset_x.value()
+        self.gmtMap.ScalebarOffsetY = self.options.spin_scalebar_offset_y.value()
+        self.gmtMap.ScalebarOffsetUnit = self.options.combo_scalebar_offset_unit.currentText()
+
+        #Labels
+        self.gmtMap.ScalebarLabelX = self.options.txt_scalebar_label_x.text().strip()
+        self.gmtMap.ScalebarLabelY = self.options.txt_scalebar_label_y.text().strip()
+        self.gmtMap.ScalebarIlluminate = self.options.chk_illuminate.isChecked()       
+
+        #Create the projection
+        self.gmtMap.Projection = gmtProjection(self.projections.combo_projections.currentText(),
+                                               self.gmtMap.getCM(),
+                                               self.gmtMap.PageWidth)
         #Package the output types..
         self.gmtMap.ConvertTypes = self.convertFormat
          
@@ -514,75 +537,81 @@ class mainWin(qtw.QDialog):
             with open(loadfile, 'rb') as f:    
                 self.gmtMap = pickle.load(f)                
                 self.populateForm() 
-                self.analyzeInput(self.txt_file_input.text())  
+                self.analyzeInput(self.txt_file_input.text())   
         except Exception as e:
             self.showMessage(3, "Error", "The file you are attempting to load does not appear to be a valid .map file!\nError: " + str(e)) 
-            #self.showMessage(3, "Error", str(e)) 
-
-    def populateForm(self):        
+            
+    ###########################################################################################################################
+    #This will be called on form load. If gmtMap is populated with data, the data will be used to populate all of the items
+    #on the main UI form, as well as the advanced options window.
+    ###########################################################################################################################
+    def populateForm(self):  
+        ################################################################################
+        #Main Form UI - ...only a handful of items here.
+        ################################################################################           
         self.txt_file_input.setText(self.gmtMap.FileInput) 
+        
+        #Region of Interest
         self.txt_north.setText(self.gmtMap.ROINorth)
         self.txt_south.setText(self.gmtMap.ROISouth)
         self.txt_east.setText(self.gmtMap.ROIEast)
         self.txt_west.setText(self.gmtMap.ROIWest)
+        
+        #Color Palette Table
         self.combo_cpt.setCurrentText(self.gmtMap.CPTFile)
         self.slider_opacity.setValue(self.gmtMap.Opacity)
         self.txt_cpt_min.setText(self.gmtMap.CPTMinValue)
         self.txt_cpt_max.setText(self.gmtMap.CPTMaxValue)
         self.txt_cpt_interval.setText(self.gmtMap.CPTInterval)
         self.combo_cpt_unit.setCurrentText(self.gmtMap.ScaleUnit)
-        self.combo_projections.setCurrentText(self.gmtMap.Projection)
+        
+        #Output File
         self.txt_file_output.setText(self.gmtMap.FileOutput)
-        #Set the options window's properties
+
+        ################################################################################
+        #Advanced options window - Map tab
+        ################################################################################
         self.options.spin_page_height.setValue(self.gmtMap.PageHeight)
         self.options.spin_page_width.setValue(self.gmtMap.PageWidth)
-        self.options.chk_add_map_classification.setChecked(self.gmtMap.MapClassificationAdd)
-        self.options.txt_map_classification.setText(self.gmtMap.MapClassification.text)
+        self.options.combo_page_size_unit.setCurrentText(self.gmtMap.PageSizeUnit)
 
-        self.options.spin_map_classsification_offset_x.setValue(self.gmtMap.MapClassificationOffsetX)
-        self.options.spin_map_classsification_offset_y.setValue(self.gmtMap.MapClassificationOffsetY)
-        self.options.combo_map_classification_offset_unit.setCurrentText(self.gmtMap.MapClassificationOffsetUnit)
-        self.options.combo_map_classification_font.setCurrentText(self.gmtMap.MapClassification.font)
-        self.options.spin_map_classification_font_size.setValue(self.gmtMap.MapClassification.size)
-        self.options.setMapClassificationColor(self.gmtMap.MapClassification.color)
+        #Map Title
         self.options.chk_add_map_title.setChecked(self.gmtMap.MapTitleAdd)
-
         self.options.txt_map_title.setText(self.gmtMap.MapTitle.text)
+        self.options.spin_map_title_offset_x.setValue(self.gmtMap.MapTitleOffsetX)
+        self.options.spin_map_title_offset_y.setValue(self.gmtMap.MapTitleOffsetY)
+        self.options.combo_map_title_offset_unit.setCurrentText(self.gmtMap.MapTitleOffsetUnit)
         self.options.combo_map_title_font.setCurrentText(self.gmtMap.MapTitle.font)
         self.options.spin_map_title_font_size.setValue(self.gmtMap.MapTitle.size)
         self.options.setMapTitleColor(self.gmtMap.MapTitle.color)
 
-        self.options.spin_map_title_offset_x.setValue(self.gmtMap.MapTitleOffsetX)
-        self.options.spin_map_title_offset_y.setValue(self.gmtMap.MapTitleOffsetY)
-        self.options.combo_map_title_offset_unit.setCurrentText(self.gmtMap.MapTitleOffsetUnit)
-        self.options.combo_page_size_unit.setCurrentText(self.gmtMap.PageSizeUnit)
-        if self.gmtMap.SymbologyLevel == 0:
-            self.options.radio_symlevel0.setChecked(True)
+        #Map Classification
+        self.options.chk_add_map_classification.setChecked(self.gmtMap.MapClassificationAdd)
+        self.options.txt_map_classification.setText(self.gmtMap.MapClassification.text)
+        self.options.spin_map_classsification_offset_x.setValue(self.gmtMap.MapClassificationOffsetX)
+        self.options.spin_map_classsification_offset_y.setValue(self.gmtMap.MapClassificationOffsetY)
+        self.options.combo_map_classification_offset_unit.setCurrentText(self.gmtMap.MapClassificationOffsetUnit)        
+        self.options.combo_map_classification_font.setCurrentText(self.gmtMap.MapClassification.font)
+        self.options.spin_map_classification_font_size.setValue(self.gmtMap.MapClassification.size)
+        self.options.setMapClassificationColor(self.gmtMap.MapClassification.color)
+
+        ################################################################################
+        #Advanced options window - Symbology Tab
+        ################################################################################
+        if self.gmtMap.SymbologyLevel == 0: #The 3 symbology options...
+                self.options.radio_symlevel0.setChecked(True)
         elif self.gmtMap.SymbologyLevel == 1:
             self.options.radio_symlevel1.setChecked(True)
         else:
-            self.options.radio_symlevel2.setChecked(True)       
- 
-        self.options.radio_horizontal.setChecked(True) if self.gmtMap.ScalebarOrientation == 'h' else self.options.radio_vertical.setChecked(True)
-        self.options.combo_scalebar_position.setCurrentText(self.gmtMap.ScalebarPositioning)
-        self.options.spin_scalebar_interval.setValue(self.gmtMap.ScalebarInterval)  
-        self.options.spin_scalebar_offset_x.setValue(self.gmtMap.ScalebarOffsetX)
-        self.options.spin_scalebar_offset_y.setValue(self.gmtMap.ScalebarOffsetY)
-        self.options.combo_scalebar_offset_unit.setCurrentText(self.gmtMap.ScalebarOffsetUnit)
-        self.options.spin_scalebar_height.setValue(self.gmtMap.ScalebarHeight)
-        self.options.spin_scalebar_width.setValue(self.gmtMap.ScalebarWidth)
-        self.options.combo_scalebar_size_unit.setCurrentText(self.gmtMap.ScalebarSizeUnit)
-        self.options.spin_scalebar_x.setValue(self.gmtMap.ScalebarXPos)
-        self.options.spin_scalebar_y.setValue(self.gmtMap.ScalebarYPos)
-        self.options.combo_scalebar_pos_unit.setCurrentText(self.gmtMap.ScalebarPosUnit)
-        self.options.txt_scalebar_label_x.setText(self.gmtMap.ScalebarLabelX)
-        self.options.txt_scalebar_label_y.setText(self.gmtMap.ScalebarLabelY)
-        self.options.chk_illuminate.setChecked(self.gmtMap.ScalebarIlluminate)
+            self.options.radio_symlevel2.setChecked(True) 
+
         self.options.combo_symbols.setCurrentText(self.gmtMap.SymbologyShape)
+        self.options.cbtn_symbology_fill.setCurrentFillColor(self.gmtMap.SymbologyFillColor)
+        self.options.cbtn_symbology_fill.setCurrentBorderColor(self.gmtMap.SymbologyBorderColor)
         self.options.spin_symbology_size.setValue(self.gmtMap.SymbologySize)
         self.options.combo_symbology_size_unit.setCurrentText(self.gmtMap.SymbologySizeUnit)
-        self.options.cbtn_symbology_fill.setCurrentFillColor(self.gmtMap.SymbologyFillColor)
-        self.options.cbtn_symbology_fill.setCurrentBorderColor(self.gmtMap.SymbologyBorderColor) 
+
+        #Coastline Data Symbology 
         self.options.cbtn_coastlines_fill.setCurrentFillColor(self.gmtMap.CoastlineFillColor)
         self.options.cbtn_coastlines_fill.setCurrentBorderColor(self.gmtMap.CoastlineBorderColor)
         self.options.combo_coastline_national_boundary_type.setCurrentText(self.gmtMap.CoastlineNationalBoundaryType) 
@@ -591,6 +620,36 @@ class mainWin(qtw.QDialog):
         self.options.combo_coastline_river_type.setCurrentText(self.gmtMap.CoastlineRiverType)
         self.options.lcbtn_rivers.setCurrentLineColor(self.gmtMap.CoastlineRiverColor)
         self.options.lcbtn_rivers.setCurrentLineWeight(self.gmtMap.CoastlineRiverWeight)
+
+        ################################################################################
+        #Advanced options window - Scalebar Tab
+        ################################################################################
+        self.options.radio_horizontal.setChecked(True) if self.gmtMap.ScalebarOrientation == 'h' else self.options.radio_vertical.setChecked(True)
+        self.options.spin_scalebar_height.setValue(self.gmtMap.ScalebarHeight)
+        self.options.spin_scalebar_width.setValue(self.gmtMap.ScalebarWidth)
+        self.options.combo_scalebar_size_unit.setCurrentText(self.gmtMap.ScalebarSizeUnit)
+
+        #Positioning
+        self.options.combo_scalebar_position.setCurrentText(self.gmtMap.ScalebarPositioning)
+        self.options.spin_scalebar_x.setValue(self.gmtMap.ScalebarXPos)
+        self.options.spin_scalebar_y.setValue(self.gmtMap.ScalebarYPos)
+        self.options.combo_scalebar_pos_unit.setCurrentText(self.gmtMap.ScalebarPosUnit)        
+        self.options.spin_scalebar_offset_x.setValue(self.gmtMap.ScalebarOffsetX)
+        self.options.spin_scalebar_offset_y.setValue(self.gmtMap.ScalebarOffsetY)
+        self.options.combo_scalebar_offset_unit.setCurrentText(self.gmtMap.ScalebarOffsetUnit)
+
+        #Labels
+        self.options.txt_scalebar_label_x.setText(self.gmtMap.ScalebarLabelX)
+        self.options.txt_scalebar_label_y.setText(self.gmtMap.ScalebarLabelY)
+        self.options.spin_scalebar_interval.setValue(self.gmtMap.ScalebarInterval)  
+        self.options.chk_illuminate.setChecked(self.gmtMap.ScalebarIlluminate)             
+            
+        #Map Projection
+        if self.gmtMap.Projection:
+            self.lbl_projection.setText(self.gmtMap.Projection.Name)
+        else:
+            self.lbl_projection.setText("No map projection selected...")
+            
     def executeScript(self):
         self.createMapObject()  
         gmtMapScript(self.gmtMap)

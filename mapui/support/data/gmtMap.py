@@ -1,4 +1,6 @@
 from support.data.gmtMapOptions import gmtMapOptions
+#from support.data.gmtProjection import gmtProjection
+
 ###########################################################################################################################
 #This class will hold all of the properties associated to create a gmtMap. This will be the gmtMap object.
 ###########################################################################################################################
@@ -117,15 +119,15 @@ class gmtMap(gmtMapOptions):
         self.FileInput = None
         self.ROINorth = '60'
         self.ROISouth = '50'
-        self.ROIEast = '130'
-        self.ROIWest = '90'
+        self.ROIEast = '90'
+        self.ROIWest = '130'
         self.CPTFile = 'seis.cpt'
         self.Opacity = 100
         self.CPTMinValue = '0'
         self.CPTMaxValue = '100'
         self.CPTInterval = '10'
         self.ScaleUnit = 'mgals'
-        self.Projection = 'Cylindrical Equidistant Projection'
+        self.Projection = None
         self.FileOutput = None
 
     ###########################################################################################################################

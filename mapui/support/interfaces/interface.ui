@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>510</width>
-    <height>601</height>
+    <height>628</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
    <property name="geometry">
     <rect>
      <x>21</x>
-     <y>387</y>
+     <y>375</y>
      <width>71</width>
      <height>17</height>
     </rect>
@@ -46,7 +46,7 @@
    <property name="geometry">
     <rect>
      <x>141</x>
-     <y>387</y>
+     <y>375</y>
      <width>71</width>
      <height>17</height>
     </rect>
@@ -59,7 +59,7 @@
    <property name="geometry">
     <rect>
      <x>258</x>
-     <y>387</y>
+     <y>375</y>
      <width>71</width>
      <height>17</height>
     </rect>
@@ -135,6 +135,9 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="text">
+    <string/>
+   </property>
    <property name="maxLength">
     <number>7</number>
    </property>
@@ -177,6 +180,9 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="text">
+    <string/>
+   </property>
    <property name="maxLength">
     <number>5</number>
    </property>
@@ -191,7 +197,7 @@
    <property name="geometry">
     <rect>
      <x>371</x>
-     <y>387</y>
+     <y>375</y>
      <width>71</width>
      <height>17</height>
     </rect>
@@ -204,7 +210,7 @@
    <property name="geometry">
     <rect>
      <x>18</x>
-     <y>277</y>
+     <y>265</y>
      <width>229</width>
      <height>31</height>
     </rect>
@@ -214,7 +220,7 @@
    <property name="geometry">
     <rect>
      <x>22</x>
-     <y>257</y>
+     <y>245</y>
      <width>171</width>
      <height>17</height>
     </rect>
@@ -227,7 +233,7 @@
    <property name="geometry">
     <rect>
      <x>18</x>
-     <y>341</y>
+     <y>329</y>
      <width>229</width>
      <height>31</height>
     </rect>
@@ -237,7 +243,7 @@
    <property name="geometry">
     <rect>
      <x>22</x>
-     <y>321</y>
+     <y>309</y>
      <width>111</width>
      <height>17</height>
     </rect>
@@ -250,7 +256,7 @@
    <property name="geometry">
     <rect>
      <x>259</x>
-     <y>544</y>
+     <y>560</y>
      <width>91</width>
      <height>33</height>
     </rect>
@@ -477,7 +483,7 @@
    <property name="geometry">
     <rect>
      <x>332</x>
-     <y>226</y>
+     <y>214</y>
      <width>161</width>
      <height>21</height>
     </rect>
@@ -587,7 +593,7 @@
    <property name="geometry">
     <rect>
      <x>28</x>
-     <y>226</y>
+     <y>214</y>
      <width>295</width>
      <height>20</height>
     </rect>
@@ -687,34 +693,11 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QLabel" name="lbl_projection">
-   <property name="geometry">
-    <rect>
-     <x>24</x>
-     <y>660</y>
-     <width>171</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Map Projection:</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="combo_projections">
-   <property name="geometry">
-    <rect>
-     <x>19</x>
-     <y>680</y>
-     <width>341</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QSlider" name="slider_opacity">
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>346</y>
+     <y>334</y>
      <width>211</width>
      <height>20</height>
     </rect>
@@ -745,7 +728,7 @@
    <property name="geometry">
     <rect>
      <x>267</x>
-     <y>257</y>
+     <y>245</y>
      <width>171</width>
      <height>17</height>
     </rect>
@@ -758,7 +741,7 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>321</y>
+     <y>309</y>
      <width>91</width>
      <height>17</height>
     </rect>
@@ -771,7 +754,7 @@
    <property name="geometry">
     <rect>
      <x>367</x>
-     <y>322</y>
+     <y>310</y>
      <width>41</width>
      <height>17</height>
     </rect>
@@ -784,7 +767,7 @@
    <property name="geometry">
     <rect>
      <x>263</x>
-     <y>276</y>
+     <y>264</y>
      <width>231</width>
      <height>35</height>
     </rect>
@@ -799,7 +782,7 @@
    <property name="geometry">
     <rect>
      <x>31</x>
-     <y>458</y>
+     <y>446</y>
      <width>351</width>
      <height>20</height>
     </rect>
@@ -903,7 +886,7 @@
    <property name="geometry">
     <rect>
      <x>390</x>
-     <y>458</y>
+     <y>446</y>
      <width>91</width>
      <height>21</height>
     </rect>
@@ -1006,14 +989,14 @@
     </font>
    </property>
    <property name="text">
-    <string>Output File</string>
+    <string>File Output</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="txt_cpt_interval">
    <property name="geometry">
     <rect>
      <x>256</x>
-     <y>406</y>
+     <y>394</y>
      <width>110</width>
      <height>31</height>
     </rect>
@@ -1029,7 +1012,7 @@
    <property name="geometry">
     <rect>
      <x>18</x>
-     <y>406</y>
+     <y>394</y>
      <width>110</width>
      <height>31</height>
     </rect>
@@ -1045,7 +1028,7 @@
    <property name="geometry">
     <rect>
      <x>138</x>
-     <y>406</y>
+     <y>394</y>
      <width>110</width>
      <height>31</height>
     </rect>
@@ -1061,7 +1044,7 @@
    <property name="geometry">
     <rect>
      <x>375</x>
-     <y>406</y>
+     <y>394</y>
      <width>110</width>
      <height>31</height>
     </rect>
@@ -1074,7 +1057,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>544</y>
+     <y>560</y>
      <width>91</width>
      <height>33</height>
     </rect>
@@ -1087,7 +1070,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>544</y>
+     <y>560</y>
      <width>91</width>
      <height>33</height>
     </rect>
@@ -1111,45 +1094,13 @@
    <property name="geometry">
     <rect>
      <x>365</x>
-     <y>544</y>
+     <y>560</y>
      <width>91</width>
      <height>33</height>
     </rect>
    </property>
    <property name="text">
     <string>Execute</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="txt_cpt_interval_2">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>371</x>
-     <y>679</y>
-     <width>100</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="maxLength">
-    <number>10</number>
-   </property>
-   <property name="placeholderText">
-    <string>90</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_17">
-   <property name="geometry">
-    <rect>
-     <x>373</x>
-     <y>660</y>
-     <width>71</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Zone:</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -1272,7 +1223,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Input File</string>
+    <string>File Input</string>
    </property>
   </widget>
   <widget class="Line" name="line_4">
@@ -1503,7 +1454,7 @@
    <property name="geometry">
     <rect>
      <x>76</x>
-     <y>387</y>
+     <y>375</y>
      <width>51</width>
      <height>17</height>
     </rect>
@@ -1558,7 +1509,7 @@
    <property name="geometry">
     <rect>
      <x>199</x>
-     <y>387</y>
+     <y>375</y>
      <width>51</width>
      <height>17</height>
     </rect>
@@ -1739,7 +1690,7 @@
    <property name="geometry">
     <rect>
      <x>455</x>
-     <y>490</y>
+     <y>505</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -1752,56 +1703,48 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>490</y>
+     <y>505</y>
      <width>438</width>
      <height>31</height>
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="lbl_projection_2">
+  <widget class="QPushButton" name="btn_set_projection">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>725</y>
-     <width>111</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Map Projection:</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn_select_projection">
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>715</y>
-     <width>110</width>
+     <x>21</x>
+     <y>467</y>
+     <width>31</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>Select</string>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
+    <string/>
    </property>
   </widget>
-  <widget class="QLabel" name="label_19">
+  <widget class="QLabel" name="lbl_projection">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>750</y>
-     <width>191</width>
+     <x>60</x>
+     <y>475</y>
+     <width>341</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
-    <string>Cylindrical equidistant</string>
+    <string/>
    </property>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget_3">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>590</y>
+     <width>511</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="statusbar_layout"/>
   </widget>
  </widget>
  <resources/>

@@ -1,18 +1,18 @@
-from support.data.gmtMap import gmtMap
+#from support.data.gmtMap import gmtMap
 from support.data.mapuiSettings import mapuiSettings
-from support.data.gmtFont import gmtFont
+#from support.data.gmtFont import gmtFont
 from PyQt5 import QtWidgets as qtw
-from PyQt5 import QtGui as qtg
+#from PyQt5 import QtGui as qtg
 ###########################################################################################################################
 #This class will take a gmtMap object and output a shell script to feed into GMT
 ###########################################################################################################################
 class gmtMapScript():
     def __init__(self, gmtMap): 
         self.__gmtMap = gmtMap
-        self.sclFactor = .9
-
+        self.sclFactor = mapuiSettings.getWidthScalingFactor()
         self.gmtPath = mapuiSettings.getGMTPath() 
         self.output = gmtMap.FileOutput
+        
         try:
             self.output_basename = gmtMap.FileOutput[gmtMap.FileOutput.rfind('/')+1:][:-3]
             self.output_directory = gmtMap.FileOutput[:gmtMap.FileOutput.rfind('/')+1:]
@@ -121,7 +121,8 @@ class gmtMapScript():
                 script.write('\nln=%s' % str(self.__gmtMap.getLongitudeGS()))
                 #Set the projection
                 projWidth = float(self.__gmtMap.PageWidth) * self.sclFactor
-                script.write('\nprojection=Q${cm}/%si' % projWidth)
+                script.write('\nprojection2=Q${cm}/%si' % projWidth)
+                script.write('\nprojection=%s%s' % (self.__gmtMap.Projection.getProjectionCode(), self.__gmtMap.PageSizeUnit[:1].lower()))
                 script.write('\nRLL=%s/%s/%s/%s' %(self.__gmtMap.ROIEast, self.__gmtMap.ROIWest, self.__gmtMap.ROISouth, self.__gmtMap.ROINorth))
 
                 script.write('\n##########################################################################################')

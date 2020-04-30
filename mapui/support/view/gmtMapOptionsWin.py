@@ -102,8 +102,8 @@ class mapUIOptions(qtw.QDialog):
         self.lbl_symlevel0.mousePressEvent = self.lbl0Click
         self.lbl_symlevel1.mousePressEvent = self.lbl1Click
         self.lbl_symlevel2.mousePressEvent = self.lbl2Click
-        self.lbl_orientation.mousePressEvent = self.lblOrientationClick
-
+        self.lbl_orientation.mousePressEvent = self.lblOrientationClick        
+      
     def lbl0Click(self, event): 
         self.radio_symlevel0.setChecked(True)
         self.checkLevels()
@@ -117,8 +117,8 @@ class mapUIOptions(qtw.QDialog):
         self.swapIcon()
         h = self.spin_page_height.value()
         self.spin_page_height.setValue(self.spin_page_width.value())
-        self.spin_page_width.setValue(h)
-
+        self.spin_page_width.setValue(h)  
+    
     def comboPositionChanged(self):
         if self.combo_scalebar_position.currentText() == 'User Defined':
             self.spin_scalebar_x.setEnabled(True)

@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QColor as qc 
 class gmtFont():
-    def __init__(self, fFont = 'Helvetica-Bold', fSize = 14, fColor=qc(0,0,0), fText=''):
+    def __init__(self, fFont = 'Helvetica-Bold', fSize = 18, fColor=qc(0,0,0), fText=''):
         self.font = fFont
         self.size = fSize
         self.color = fColor 
