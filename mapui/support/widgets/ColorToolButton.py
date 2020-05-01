@@ -1,7 +1,5 @@
 from PyQt5 import QtWidgets as qtw 
 from PyQt5 import QtGui as qtg
-from PyQt5 import QtCore as qtc 
-
 ###########################################################################################################################
 #This class will subclass the QToolButton control to display a colored box (to represent the current color) and a drop
 #menu to allow for selecting a new color for both the fill and the outline of the box. This is a slightly more compact
@@ -18,7 +16,6 @@ class ColorToolButton(qtw.QToolButton):
         self.fillIcon = qtg.QIcon('./support/icons/color2.png')
         self.borderIcon = qtg.QIcon('./support/icons/color3.png') 
 
-        #Create a new menu and add menu actions..
         menu = qtw.QMenu()       
         self.chooseFillAction = qtw.QAction(self.fillIcon, "Choose Fill", self)
         self.chooseBorderAction = qtw.QAction(self.borderIcon, "Choose Border", self)
@@ -35,8 +32,9 @@ class ColorToolButton(qtw.QToolButton):
         self.colorBox = ShowColor(self.__CurrentFillColor, self.__CurrentBorderColor)
         self.cLayout.addWidget(self.colorBox)
         self.setLayout(self.cLayout)  
+        self.setDefaultAction(self.chooseFillAction)
 
-
+                     
     def setCurrentFillColor(self, fc):
         self.__CurrentFillColor = fc 
         self.PaintColor() 
@@ -50,9 +48,7 @@ class ColorToolButton(qtw.QToolButton):
     
     def getCurrentBorderColor(self):
         return self.__CurrentBorderColor
-
-    def disableMenuItem(self, idx):
-        pass
+    
     ###########################################################################################################################
     #This will clear the current colored box in order to make room for a new one...
     ###########################################################################################################################

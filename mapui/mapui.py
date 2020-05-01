@@ -401,6 +401,39 @@ class mainWin(qtw.QDialog):
         self.viewer.DrawPalette(cpt, alpha)
 
     ###########################################################################################################################
+    #This will call up a QFileDialog for saving the map parameters (.map file)
+    ###########################################################################################################################
+    def saveParameters(self):
+        #Set up the file dialog with the appropriate options...
+        savefile = qtw.QFileDialog.getSaveFileName(self, 'Save Map Parameters', self.currentDir, 'Map Parameters (.map)(*.map)')[0] 
+        if savefile:
+            self.createMapObject()
+            self.currentDir = path.split(savefile)[0]
+        else:
+            return
+
+        with open(savefile, 'wb') as f:            
+            pickle.dump(self.gmtMap, f)         
+
+    ###########################################################################################################################
+    #This will call up a QFileDialog for saving the load in the map parameters (.map file)
+    ###########################################################################################################################
+    def loadParameters(self, loadfile = None):
+        if not loadfile:
+            loadfile = qtw.QFileDialog.getOpenFileName(self, 'Open Map Parameters', self.currentDir, 'Map Parameters (.map)(*.map)')[0] 
+        if loadfile:
+            self.currentDir = path.split(loadfile)[0]
+        else:
+            return            
+        try:       
+            with open(loadfile, 'rb') as f:    
+                self.gmtMap = pickle.load(f)                
+                self.populateForm() 
+                self.analyzeInput(self.txt_file_input.text())   
+        except Exception as e:
+            self.showMessage(3, "Error", "The file you are attempting to load does not appear to be a valid .map file!\nError: " + str(e)) 
+            
+    ###########################################################################################################################
     #This will save the interface parameters and options to a gmtMap object. The values will come from each UI control.
     ########################################################################################################################### 
     def createMapObject(self):
@@ -469,8 +502,11 @@ class mainWin(qtw.QDialog):
         self.gmtMap.SymbologySizeUnit = self.options.combo_symbology_size_unit.currentText()
         
         #Coastline Data
-        self.gmtMap.CoastlineFillColor = self.options.cbtn_coastlines_fill.getCurrentFillColor()
-        self.gmtMap.CoastlineBorderColor = self.options.cbtn_coastlines_fill.getCurrentBorderColor() 
+        self.gmtMap.CoastlineResolution = self.options.combo_resolution.currentText()
+        self.gmtMap.CoastlineLandFillColor = self.options.cbtn_coastlines_fill.getCurrentFillColor()
+        self.gmtMap.CoastlineWaterFillColor = self.options.cbtn_coastlines_water_fill.getCurrentFillColor()
+        self.gmtMap.CoastlineBorderColor = self.options.lcbtn_coastline_border.getCurrentLineColor()
+        self.gmtMap.CoastlineBorderWeight = self.options.lcbtn_coastline_border.getCurrentLineWeight()
         self.gmtMap.CoastlineNationalBoundaryType = self.options.combo_coastline_national_boundary_type.currentText()
         self.gmtMap.CoastlineNationalBoundaryColor = self.options.lcbtn_national_boundary.getCurrentLineColor()
         self.gmtMap.CoastlineNationalBoundaryWeight = self.options.lcbtn_national_boundary.getCurrentLineWeight()
@@ -506,40 +542,8 @@ class mainWin(qtw.QDialog):
                                                self.gmtMap.getCM(),
                                                self.gmtMap.PageWidth)
         #Package the output types..
-        self.gmtMap.ConvertTypes = self.convertFormat
-         
-    ###########################################################################################################################
-    #This will call up a QFileDialog for saving the map parameters (.map file)
-    ###########################################################################################################################
-    def saveParameters(self):
-        #Set up the file dialog with the appropriate options...
-        savefile = qtw.QFileDialog.getSaveFileName(self, 'Save Map Parameters', self.currentDir, 'Map Parameters (.map)(*.map)')[0] 
-        if savefile:
-            self.createMapObject()
-            self.currentDir = path.split(savefile)[0]
-        else:
-            return
+        self.gmtMap.ConvertTypes = self.convertFormat         
 
-        with open(savefile, 'wb') as f:            
-            pickle.dump(self.gmtMap, f)         
-
-    ###########################################################################################################################
-    #This will call up a QFileDialog for saving the load in the map parameters (.map file)
-    ###########################################################################################################################
-    def loadParameters(self, loadfile = None):
-        if not loadfile:
-            loadfile = qtw.QFileDialog.getOpenFileName(self, 'Open Map Parameters', self.currentDir, 'Map Parameters (.map)(*.map)')[0] 
-        if loadfile:
-            self.currentDir = path.split(loadfile)[0]
-        else:
-            return            
-        try:       
-            with open(loadfile, 'rb') as f:    
-                self.gmtMap = pickle.load(f)                
-                self.populateForm() 
-                self.analyzeInput(self.txt_file_input.text())   
-        except Exception as e:
-            self.showMessage(3, "Error", "The file you are attempting to load does not appear to be a valid .map file!\nError: " + str(e)) 
             
     ###########################################################################################################################
     #This will be called on form load. If gmtMap is populated with data, the data will be used to populate all of the items
@@ -612,8 +616,11 @@ class mainWin(qtw.QDialog):
         self.options.combo_symbology_size_unit.setCurrentText(self.gmtMap.SymbologySizeUnit)
 
         #Coastline Data Symbology 
-        self.options.cbtn_coastlines_fill.setCurrentFillColor(self.gmtMap.CoastlineFillColor)
-        self.options.cbtn_coastlines_fill.setCurrentBorderColor(self.gmtMap.CoastlineBorderColor)
+        self.options.combo_resolution.setCurrentText(self.gmtMap.CoastlineResolution)
+        self.options.cbtn_coastlines_fill.setCurrentFillColor(self.gmtMap.CoastlineLandFillColor)
+        self.options.cbtn_coastlines_water_fill.setCurrentFillColor(self.gmtMap.CoastlineWaterFillColor)
+        self.options.lcbtn_coastline_border.setCurrentLineColor(self.gmtMap.CoastlineBorderColor)
+        self.options.lcbtn_coastline_border.setCurrentLineWeight(self.gmtMap.CoastlineBorderWeight)
         self.options.combo_coastline_national_boundary_type.setCurrentText(self.gmtMap.CoastlineNationalBoundaryType) 
         self.options.lcbtn_national_boundary.setCurrentLineColor(self.gmtMap.CoastlineNationalBoundaryColor)
         self.options.lcbtn_national_boundary.setCurrentLineWeight(self.gmtMap.CoastlineNationalBoundaryWeight)

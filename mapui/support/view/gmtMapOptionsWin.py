@@ -4,6 +4,7 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import uic
 from support.data.mapuiSettings import mapuiSettings
 from support.widgets.ColorToolButton import ColorToolButton
+from support.widgets.ColorButton import ColorButton
 from support.widgets.LineColorButton import LineColorButton
 
 ###########################################################################################################################
@@ -39,7 +40,9 @@ class mapUIOptions(qtw.QDialog):
         self.combo_scalebar_offset_unit.addItems(mapuiSettings.getUnitsOfMeasure())
         self.combo_map_title_offset_unit.addItems(mapuiSettings.getUnitsOfMeasure())
         self.combo_map_classification_offset_unit.addItems(mapuiSettings.getUnitsOfMeasure()) 
-
+        self.combo_resolution.addItems(mapuiSettings.getResolutions()) 
+        self.combo_resolution.setCurrentText("Low") 
+        
         #Add the coastline border types 
         for item in mapuiSettings.getBorderTypes():
             self.combo_coastline_national_boundary_type.addItem(item[0])
@@ -75,10 +78,22 @@ class mapUIOptions(qtw.QDialog):
         self.chk_add_map_classification.stateChanged.connect(self.toggleClassification) 
         self.swapIcon()
 
+        #ColorToolButton for Symbology
         self.cbtn_symbology_fill = ColorToolButton()
         self.color_button_layout.addWidget(self.cbtn_symbology_fill)
-        self.cbtn_coastlines_fill = ColorToolButton()
+        
+        #ColorButton for coastline data (land)
+        self.cbtn_coastlines_fill = ColorButton()
         self.coastline_color_layout.addWidget(self.cbtn_coastlines_fill)
+        
+        #ColorButton for coastline data (water)
+        self.cbtn_coastlines_water_fill = ColorButton()
+        self.coastline_water_color_layout.addWidget(self.cbtn_coastlines_water_fill)
+         
+        #LineColorButton for coastline borders
+        self.lcbtn_coastline_border = LineColorButton()
+        self.coastline_border_layout.addWidget(self.lcbtn_coastline_border)
+        
         self.btn_map_title_font_color.clicked.connect(self.chooseFontColor)
         self.btn_map_classification_font_color.clicked.connect(self.chooseFontColor)
 

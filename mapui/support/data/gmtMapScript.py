@@ -142,6 +142,7 @@ class gmtMapScript():
                 script.write('\nscalebar_offset_x=%s' % self.__gmtMap.ScalebarOffsetX)
                 script.write('\nscalebar_offset_y=%s' % self.__gmtMap.ScalebarOffsetY)
                 script.write('\nscalebar_offset_unit=%s' % self.__gmtMap.ScalebarOffsetUnit[:1].lower())
+                
                 script.write('\n##########################################################################################')
                 script.write('\n#DECLARE MAP SYMBOLOGY SETTINGS')
                 script.write('\n##########################################################################################')
@@ -150,8 +151,11 @@ class gmtMapScript():
                 script.write('\nsymbol_size_unit=%s' % self.__gmtMap.SymbologySizeUnit[:1].lower())
                 script.write('\nsymbol_fill_color=%s' % self.convertColor(self.__gmtMap.SymbologyFillColor))
                 script.write('\nsymbol_border_color=%s' % self.convertColor(self.__gmtMap.SymbologyBorderColor))
-                script.write('\ncoast_fill_color=%s' % self.convertColor(self.__gmtMap.CoastlineFillColor))
+                script.write('\ncoastline_resolution=%s' % self.__gmtMap.CoastlineResolution[:1].lower())
+                script.write('\ncoast_fill_color=%s' % self.convertColor(self.__gmtMap.CoastlineLandFillColor))
+                script.write('\ncoast_water_color=%s' % self.convertColor(self.__gmtMap.CoastlineWaterFillColor))
                 script.write('\ncoast_border_color=%s' % self.convertColor(self.__gmtMap.CoastlineBorderColor))
+                script.write('\ncoast_border_weight=%s' % self.__gmtMap.CoastlineBorderWeight)
                 script.write('\nnational_boundaries_color=%s' % self.convertColor(self.__gmtMap.CoastlineNationalBoundaryColor))
                 script.write('\nnational_boundaries_type=%s' % self.getNationaBoundaryCode(self.__gmtMap.CoastlineNationalBoundaryType))
                 script.write('\nnational_boundaries_weight=%s' % self.__gmtMap.CoastlineNationalBoundaryWeight)
@@ -185,10 +189,10 @@ class gmtMapScript():
                 script.write('\necho Creating Coastlines...')
                 #Add rivers
                 if rivers  != '-1':
-                    script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,${coast_border_color} -G${coast_fill_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -I${river_type}/${river_weight}p,${river_color} -Xc -Yc  -K  -V > ${out_file}')
+                    script.write('\ngmt pscoast -R${RLL} -J${projection} -D${coastline_resolution} -W${coast_border_weight}p,${coast_border_color} -G${coast_fill_color} -S${coast_water_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -I${river_type}/${river_weight}p,${river_color} -Xc -Yc  -K  -V > ${out_file}')
                 #Don't add rivers
                 else:
-                    script.write('\ngmt pscoast -R${RLL} -J${projection} -W0.5p,${coast_border_color} -G${coast_fill_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -Xc -Yc -K -V > ${out_file}')
+                    script.write('\ngmt pscoast -R${RLL} -J${projection} -D${coastline_resolution} -W${coast_border_weight}p,${coast_border_color} -G${coast_fill_color} -S${coast_water_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -Xc -Yc -K -V > ${out_file}')
                 
                 script.write('\n\n##########################################################################################')
                 script.write('\n#PLOT THE XY DATA FROM THE INPUT FILE')

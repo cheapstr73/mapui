@@ -86,7 +86,18 @@ class mapuiSettings():
             ["User Defined", "UD"]
         ]
         return pos
-
+    
+    @staticmethod 
+    def getResolutions():
+        res = [
+                "Full",
+                "High",
+                "Intermediate",
+                "Low",
+                "Crude"
+            ]
+        return res 
+    
     @staticmethod 
     def getGMTFonts():
         fonts = [

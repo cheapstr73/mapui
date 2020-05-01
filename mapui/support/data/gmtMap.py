@@ -133,11 +133,19 @@ class gmtMap(gmtMapOptions):
     ###########################################################################################################################
     #This will return the central meridian of the East/West coordinates
     ###########################################################################################################################    
-    def getCM(self):
+    def getCenttralMeridianM(self):
         pe = float(self.ROIEast)
         pw = float(self.ROIWest)
         return float(round((pe+pw) / 2.0))
 
+    ###########################################################################################################################
+    #This will return the standard parallel of the North/South coordinates
+    ###########################################################################################################################  
+    def getStandardParalledl(self):
+        pn = float(self.ROINorth)
+        ps = float(self.ROISouth)
+        return float(round((pn+ps) / 2.0))
+        
     ###########################################################################################################################
     #This will return the Latitude grid spacing in degres
     ###########################################################################################################################

@@ -37,8 +37,11 @@ class gmtMapOptions():
         self.SymbologySizeUnit = 'Points'
         self.SymbologyFillColor = qtg.QColor(255,0,0)
         self.SymbologyBorderColor = qtg.QColor(0,0,0) 
-        self.CoastlineFillColor = qtg.QColor(255,255,255)
+        self.CoastlineResolution = 'Low'
+        self.CoastlineLandFillColor = qtg.QColor(255,255,255)
+        self.CoastlineWaterFillColor = qtg.QColor(117,161,221)
         self.CoastlineBorderColor = qtg.QColor(190,190,190)
+        self.CoastlineBorderWeight = .5
         self.CoastlineNationalBoundaryColor = qtg.QColor(190,190,190)
         self.CoastlineNationalBoundaryWeight = 1
         self.CoastlineNationalBoundaryType = 'National Boundaries'
@@ -46,20 +49,41 @@ class gmtMapOptions():
         self.CoastlineRiverColor = qtg.QColor(174,211,239)
         self.CoastlineRiverWeight = .5
 
+    @property 
+    def CoastlineResolution(self):
+        return self.__CoastlineResolution 
+    @CoastlineResolution.setter
+    def CoastlineResolution(self, res):
+        self.__CoastlineResolution = res 
+        
     @property
-    def CoastlineFillColor(self):
-        return self.__CoastlineFillColor
-    @CoastlineFillColor.setter 
-    def CoastlineFillColor(self, fill):
-        self.__CoastlineFillColor = fill
+    def CoastlineLandFillColor(self):
+        return self.__CoastlineLandFillColor
+    @CoastlineLandFillColor.setter 
+    def CoastlineLandFillColor(self, fill):
+        self.__CoastlineLandFillColor = fill
 
+    @property
+    def CoastlineWaterFillColor(self):
+        return self.__CoastlineWaterFillColor
+    @CoastlineWaterFillColor.setter 
+    def CoastlineWaterFillColor(self, fill):
+        self.__CoastlineWaterFillColor = fill
+        
     @property
     def CoastlineBorderColor(self):
         return self.__CoastlineBorderColor
     @CoastlineBorderColor.setter 
     def CoastlineBorderColor(self, borderColor):
         self.__CoastlineBorderColor = borderColor
-    
+   
+    @property
+    def CoastlineBorderWeight(self):
+        return self.__CoastlineBorderWeight
+    @CoastlineBorderWeight.setter 
+    def CoastlineBorderWeight(self, weight):
+        self.__CoastlineBorderWeight = weight
+        
     @property 
     def CoastlineNationalBoundaryType(self):
         return self.__CoastlineNationalBoundaryType
