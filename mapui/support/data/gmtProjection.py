@@ -1,51 +1,90 @@
 from support.data.mapuiSettings import mapuiSettings
 class gmtProjection():
-    def __init__(self, name, cm, width):
+    def __init__(self):
         self.Type = 2
-        self.Name = name
-        self.CentralMeridian = cm
-        self.Width = width
-        
+        self.Name = None
+        self.CentralMeridian = None
+        self.Width = None
+        self.Azimuth = None
         #Set these to None, I will code this portion later; right now doing the basics (above)
         self.Scale = None
         self.Code = None
         self.ProjectionCenter = None
         self.StandardParallel = None
-        self.UTMZone = None      
+        self.StandardParallels = None
+        self.UTMZone = None
+    
+    def createAzimuthalProjection(self, name, projectionCenter, azimuth, width):
+        self.Name = name
+        self.ProjectionCenter = projectionCenter
+        self.Azimuth = azimuth
+        self.Width = width
+        
+    def createConicProjection(self, name, projectionCenter, standardParallels, width):
+        self.Name = name
+        self.ProjectionCenter = projectionCenter
+        self.StandardParallels = standardParallels
+        self.Width = width 
+        
+    def createCylindricProjection(self, name, centralMeridian, width):
+        self.Name = name
+        self.CentralMeridian = centralMeridian        
+        self.Width = width
         
     def getProjectionCode(self):
         for item in self.projectionList():
            # if item[0].startswith('*'):
                # continue
             if self.Name == item[0]:
-                if self.Type == 1:
-                    return item[1].lower() + str(self.CentralMeridian) + '/**' + str(self.Scale)
-                else:
+                if item[2] == "Cylindrical" or item[2] == "Miscellaneous":
                     return item[1].upper() + str(self.CentralMeridian) + '/' + str((float(self.Width) * mapuiSettings.getWidthScalingFactor()))
+                elif item[2] == "Azimuthal":
+                    return item[1].upper() + str(self.ProjectionCenter) + '/' + str(self.Azimuth) + '/' + str((float(self.Width) * mapuiSettings.getWidthScalingFactor()))
+                elif item[2] == "Conic":
+                    return item[1].upper() + str(self.ProjectionCenter) + '/' + str(self.StandardParallels) + '/' + str((float(self.Width) * mapuiSettings.getWidthScalingFactor()))
                 
     @staticmethod
     def projectionList():
         proj = [
+                
+            ["*Azimuthal Projections", "-1", "-1"],
+            ["Azimuthal Equidistant Projection", "E", "Azimuthal"],
+            ["Gnomonic Projection", "F", "Azimuthal"],
+            ["Lambert Azimuthal Equal Area", "A", "Azimuthal"],
+            ["Orthographic Projection", "G", "Azimuthal"],
+            ["Stereographic Equal Angle Projection", "S", "Azimuthal"],
+            
+            ["*Conic Projections", "-1", "-1"],
+            ["Albers Conic Equal Area Projection", "B", "Conic"],
+            ["Equidistant Conic Projection", "L", "Conic"],
+            ["Lambert Conic Conformal Projection", "D", "Conic"],
+                
             ["*Cylindrical Projections", "-1", "-1"],
             #["Cassini Cylindrical Projection", "C", "Cylindrical"],
             ["Cylindrical Equal Area Projection", "Y", "Cylindrical"],
             ["Cylindrical Equidistant Projection", "Q", "Cylindrical"],
             ["Mercator Projection", "M", "Cylindrical"],
-            ["Miller Cylindricals Projection", "J", "Cylindrical"],
+            ["Miller Cylindrical Projection", "J", "Cylindrical"],
             ["Transverse Mercator Projection", "T", "Cylindrical"],
             
             ["*Miscellaneous Projections", "-1", "-1"],
-            ["Eckert IV and VI Projection", "K", "Miscellaneous"],
+            ["Eckert VI Projection", "K", "Miscellaneous"],
             ["Hammer Projection", "H", "Miscellaneous"],
             ["Mollweide Projection", "W", "Miscellaneous"],
             ["Robinson Projection", "N", "Miscellaneous"],
             ["Sinusoidal Projection", "I", "Miscellaneous"],
-            ["Van der Grinten Projection", "V", "Miscellaneous"],
-            ["Winkel Tripel Projection", "R", "Miscellaneous"]
-            
+            ["Van Der Grinten Projection", "V", "Miscellaneous"],
+            ["Winkel Tripel Projection", "R", "Miscellaneous"]            
         ]
         return proj
     
+    @property
+    def Azimuth(self):
+        return self.__Azimuth 
+    @Azimuth.setter 
+    def Azimuth(self, az):
+        self.__Azimuth = az 
+        
     @property 
     def Code(self):
         return self.__Code 
@@ -88,6 +127,13 @@ class gmtProjection():
     def StandardParallel(self, sp):
         self.__StandardParallel = sp 
     
+    @property 
+    def StandardParallels(self):
+        return self.__StandardParallels
+    @StandardParallels.setter 
+    def StandardParallels(self, sp):
+        self.__StandardParallels = sp 
+        
     @property 
     def Scale(self):
         return self.__Scale 

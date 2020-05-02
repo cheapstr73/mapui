@@ -538,9 +538,18 @@ class mainWin(qtw.QDialog):
         self.gmtMap.ScalebarIlluminate = self.options.chk_illuminate.isChecked()       
 
         #Create the projection
-        self.gmtMap.Projection = gmtProjection(self.projections.combo_projections.currentText(),
-                                               self.gmtMap.getCM(),
-                                               self.gmtMap.PageWidth)
+        proj = gmtProjection.projectionList()
+        name = self.projections.combo_projections.currentText()
+        for p in proj:
+            if name == p[0]:
+                self.gmtMap.Projection = gmtProjection()
+                if p[2] == "Cylindrical" or p[2] == "Miscellaneous":
+                    self.gmtMap.Projection.createCylindricProjection(name, self.gmtMap.getCentralMeridian(), self.gmtMap.PageWidth)
+                elif p[2] == "Azimuthal":
+                    self.gmtMap.Projection.createAzimuthalProjection(name, self.gmtMap.getProjectionCenter(), self.gmtMap.getAzimuth(), self.gmtMap.PageWidth)
+                elif p[2] == "Conic":
+                    self.gmtMap.Projection.createConicProjection(name, self.gmtMap.getProjectionCenter(), self.gmtMap.get2StandardParallels(), self.gmtMap.PageWidth)
+                    
         #Package the output types..
         self.gmtMap.ConvertTypes = self.convertFormat         
 

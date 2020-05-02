@@ -133,7 +133,7 @@ class gmtMap(gmtMapOptions):
     ###########################################################################################################################
     #This will return the central meridian of the East/West coordinates
     ###########################################################################################################################    
-    def getCenttralMeridianM(self):
+    def getCentralMeridian(self):
         pe = float(self.ROIEast)
         pw = float(self.ROIWest)
         return float(round((pe+pw) / 2.0))
@@ -141,11 +141,29 @@ class gmtMap(gmtMapOptions):
     ###########################################################################################################################
     #This will return the standard parallel of the North/South coordinates
     ###########################################################################################################################  
-    def getStandardParalledl(self):
+    def getStandardParallel(self):
         pn = float(self.ROINorth)
         ps = float(self.ROISouth)
         return float(round((pn+ps) / 2.0))
         
+    def getProjectionCenter(self):
+        return str(self.getCentralMeridian()) + '/' + str(self.getStandardParallel())
+    
+    def get2StandardParallels(self):
+        minLat = float(self.ROISouth)
+        maxLat = float(self.ROINorth)
+        lats = (maxLat - minLat) / 4
+        midBottom = minLat + lats
+        midTop = midBottom + (lats*2)
+        return str(midBottom) + '/' + str(midTop)
+    
+    def getAzimuth(self):
+        cm = self.getCentralMeridian() 
+        calc = float(self.ROIWest) - cm 
+        if calc > 90:
+            return str(90)            
+        return str(calc)
+    
     ###########################################################################################################################
     #This will return the Latitude grid spacing in degres
     ###########################################################################################################################

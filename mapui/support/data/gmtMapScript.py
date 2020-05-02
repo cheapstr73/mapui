@@ -116,13 +116,13 @@ class gmtMapScript():
                 script.write('\npage_height=%s' % self.__gmtMap.PageHeight)
                 script.write('\npage_width=%s' % self.__gmtMap.PageWidth)
                 script.write('\npage_size_unit=%s' % self.__gmtMap.PageSizeUnit[:1].lower())
-                script.write('\ncm=%s' % str(self.__gmtMap.getCM())) 
+                script.write('\ncm=%s' % str(self.__gmtMap.getCentralMeridian())) 
                 script.write('\nlt=%s' % str(self.__gmtMap.getLatitudeGS()))
                 script.write('\nln=%s' % str(self.__gmtMap.getLongitudeGS()))
                 #Set the projection
                 projWidth = float(self.__gmtMap.PageWidth) * self.sclFactor
                 script.write('\nprojection2=Q${cm}/%si' % projWidth)
-                script.write('\nprojection=%s%s' % (self.__gmtMap.Projection.getProjectionCode(), self.__gmtMap.PageSizeUnit[:1].lower()))
+                script.write('\nprojection=%s%s' % (str(self.__gmtMap.Projection.getProjectionCode()), self.__gmtMap.PageSizeUnit[:1].lower()))
                 script.write('\nRLL=%s/%s/%s/%s' %(self.__gmtMap.ROIEast, self.__gmtMap.ROIWest, self.__gmtMap.ROISouth, self.__gmtMap.ROINorth))
 
                 script.write('\n##########################################################################################')
