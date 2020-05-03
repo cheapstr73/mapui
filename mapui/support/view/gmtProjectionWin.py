@@ -3,8 +3,7 @@ from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc 
 from PyQt5 import uic
 from support.data.gmtProjection import gmtProjection 
-#from support.data.mapuiSettings import mapuiSettings 
- 
+
 class gmtProjectionWin(qtw.QDialog):
     #Create a custom signal for the 'Submit' button
     submitted = qtc.pyqtSignal(str)   

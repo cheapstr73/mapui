@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg 
 
 class LineColorButton(qtw.QToolButton):
-    def __init__(self, color=qtg.QColor(0,0,0)):
+    def __init__(self, color=qtg.QColor(0,0,0), weight=1.0):
         super(LineColorButton, self).__init__()
         
         self.setFixedHeight(30)
@@ -17,7 +17,7 @@ class LineColorButton(qtw.QToolButton):
 
         #Set up the spin control properties...
         self.spinner = qtw.QDoubleSpinBox()
-        self.spinner.setFixedWidth(55)
+        self.spinner.setFixedWidth(60)
         self.spinner.setMinimum(.25)
         self.spinner.setMaximum(99.50)
         self.spinner.setSingleStep(.25)
@@ -31,7 +31,9 @@ class LineColorButton(qtw.QToolButton):
 
         self.setLayout(self.layout)
         self.setFixedWidth(110) 
+        
         self.setCurrentLineColor(color)
+        self.setCurrentLineWeight(weight)
 
     def valueChanged(self):
         self.setCurrentLineWeight(self.spinner.value())

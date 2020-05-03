@@ -1,10 +1,14 @@
 from PyQt5.QtGui import QColor as qc 
 class gmtFont():
-    def __init__(self, fFont = 'Helvetica-Bold', fSize = 18, fColor=qc(0,0,0), fText=''):
+    def __init__(self, fFont = 'Helvetica-Bold', fSize = 18, fColor=qc(0,0,0), fText='', offsetx=0, offsety =0, offsetunit='Points'):
         self.font = fFont
         self.size = fSize
         self.color = fColor 
         self.text = fText
+        self.offsetX = offsetx
+        self.offsetY = offsety
+        self.offsetUnit = offsetunit
+        
     @property
     def font(self):
         return self.__font
@@ -33,4 +37,24 @@ class gmtFont():
     def text(self, t):
         self.__text = t
 
+    @property 
+    def offsetX(self):
+        return self.__offsetX 
+    @offsetX.setter
+    def offsetX(self, x):
+        self.__offsetX = x
     
+    @property 
+    def offsetY(self):
+        return self.__offsetY
+    @offsetY.setter
+    def offsetY(self, y):
+        self.__offsetY = y
+    
+    @property 
+    def offsetUnit(self):
+        return self.__offsetUnit 
+    @offsetUnit.setter
+    def offsetUnit(self, unit):
+        self.__offsetUnit = unit 
+        

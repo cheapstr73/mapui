@@ -9,7 +9,7 @@ from PyQt5 import QtWidgets as qtw
 class gmtMapScript():
     def __init__(self, gmtMap): 
         self.__gmtMap = gmtMap
-        self.sclFactor = mapuiSettings.getWidthScalingFactor()
+        self.sclFactor = self.__gmtMap.MapScaleFactor
         self.gmtPath = mapuiSettings.getGMTPath() 
         self.output = gmtMap.FileOutput
         
@@ -88,9 +88,9 @@ class gmtMapScript():
                     script.write('\nclassification_font=%s' % self.__gmtMap.MapClassification.font)
                     script.write('\nclassification_font_size=%s' % self.__gmtMap.MapClassification.size)
                     script.write('\nclassification_color=%s' % self.convertColor(self.__gmtMap.MapClassification.color))
-                    script.write('\nclassification_offset_x=%s' % self.__gmtMap.MapClassificationOffsetX)
-                    script.write('\nclassification_offset_y=%s' % self.__gmtMap.MapClassificationOffsetY)
-                    script.write('\nclassification_offset_unit=%s' % self.__gmtMap.MapClassificationOffsetUnit[:1].lower())
+                    script.write('\nclassification_offset_x=%s' % self.__gmtMap.MapClassification.offsetX)
+                    script.write('\nclassification_offset_y=%s' % self.__gmtMap.MapClassification.offsetY)
+                    script.write('\nclassification_offset_unit=%s' % self.__gmtMap.MapClassification.offsetUnit[:1].lower())
                 if self.__gmtMap.MapTitleAdd:
                     script.write('\n##########################################################################################')
                     script.write('\n#DECLARE MAP TITLE INFO')
@@ -117,32 +117,46 @@ class gmtMapScript():
                 script.write('\npage_width=%s' % self.__gmtMap.PageWidth)
                 script.write('\npage_size_unit=%s' % self.__gmtMap.PageSizeUnit[:1].lower())
                 script.write('\ncm=%s' % str(self.__gmtMap.getCentralMeridian())) 
-                script.write('\nlt=%s' % str(self.__gmtMap.getLatitudeGS()))
-                script.write('\nln=%s' % str(self.__gmtMap.getLongitudeGS()))
+                script.write('\nlt=%s' % str(self.__gmtMap.GridlineIntervalY))
+                script.write('\nln=%s' % str(self.__gmtMap.GridlineIntervalX))
+                #script.write('\nlt=%s' % str(self.__gmtMap.getLatitudeGS()))
+                #script.write('\nln=%s' % str(self.__gmtMap.getLongitudeGS()))
                 #Set the projection
                 projWidth = float(self.__gmtMap.PageWidth) * self.sclFactor
                 script.write('\nprojection2=Q${cm}/%si' % projWidth)
                 script.write('\nprojection=%s%s' % (str(self.__gmtMap.Projection.getProjectionCode()), self.__gmtMap.PageSizeUnit[:1].lower()))
                 script.write('\nRLL=%s/%s/%s/%s' %(self.__gmtMap.ROIEast, self.__gmtMap.ROIWest, self.__gmtMap.ROISouth, self.__gmtMap.ROINorth))
 
-                script.write('\n##########################################################################################')
-                script.write('\n#DECLARE SCALEBAR SETTINGS')
-                script.write('\n##########################################################################################')
-                script.write('\nscale_unit=%s' % self.__gmtMap.ScaleUnit)
-                script.write('\nscalebar_height=%s' % self.__gmtMap.ScalebarHeight)
-                script.write('\nscalebar_width=%s' % self.__gmtMap.ScalebarWidth)
-                script.write('\nscalebar_width_unit=%s' % self.__gmtMap.ScalebarSizeUnit[:1].lower())
-                script.write('\nscalebar_x_pos=%s' % self.__gmtMap.ScalebarXPos)
-                script.write('\nscalebar_y_pos=%s' % self.__gmtMap.ScalebarYPos)
-                script.write('\nscalebar_pos_unit=%s' % self.__gmtMap.ScalebarPosUnit[:1].lower())
-                script.write('\nscalebar_label_x=\"%s\"' % self.__gmtMap.ScalebarLabelX)
-                script.write('\nscalebar_label_y=%s' % self.__gmtMap.ScalebarLabelY)
-                script.write('\nscalebar_interval=%s' % self.__gmtMap.ScalebarInterval)
-                script.write('\nscalebar_positioning=%s' % self.getScalebarPositioningCode(self.__gmtMap.ScalebarPositioning))             
-                script.write('\nscalebar_offset_x=%s' % self.__gmtMap.ScalebarOffsetX)
-                script.write('\nscalebar_offset_y=%s' % self.__gmtMap.ScalebarOffsetY)
-                script.write('\nscalebar_offset_unit=%s' % self.__gmtMap.ScalebarOffsetUnit[:1].lower())
-                
+                if self.__gmtMap.Scalebar:
+                    script.write('\n##########################################################################################')
+                    script.write('\n#DECLARE SCALEBAR SETTINGS')
+                    script.write('\n##########################################################################################')
+                    script.write('\nscale_unit=%s' % self.__gmtMap.ScaleUnit)
+                    script.write('\nscalebar_height=%s' % self.__gmtMap.ScalebarHeight)
+                    script.write('\nscalebar_width=%s' % self.__gmtMap.ScalebarWidth)
+                    script.write('\nscalebar_width_unit=%s' % self.__gmtMap.ScalebarSizeUnit[:1].lower())
+                    script.write('\nscalebar_x_pos=%s' % self.__gmtMap.ScalebarXPos)
+                    script.write('\nscalebar_y_pos=%s' % self.__gmtMap.ScalebarYPos)
+                    script.write('\nscalebar_pos_unit=%s' % self.__gmtMap.ScalebarPosUnit[:1].lower())
+                    script.write('\nscalebar_label_x=\"%s\"' % self.__gmtMap.ScalebarLabelX)
+                    script.write('\nscalebar_label_y=%s' % self.__gmtMap.ScalebarLabelY)
+                    script.write('\nscalebar_interval=%s' % self.__gmtMap.ScalebarInterval)
+                    script.write('\nscalebar_positioning=%s' % self.getScalebarPositioningCode(self.__gmtMap.ScalebarPositioning))             
+                    script.write('\nscalebar_offset_x=%s' % self.__gmtMap.ScalebarOffsetX)
+                    script.write('\nscalebar_offset_y=%s' % self.__gmtMap.ScalebarOffsetY)
+                    script.write('\nscalebar_offset_unit=%s' % self.__gmtMap.ScalebarOffsetUnit[:1].lower())
+                    if self.__gmtMap.ScalebarFrame:
+                        script.write('\nscalebar_border=%s,%s' % (self.__gmtMap.ScalebarFrameBorderWidth, self.convertColor(self.__gmtMap.ScalebarFrameBorderColor)))
+                        script.write('\nscalebar_fill=%s' % self.convertColor(self.__gmtMap.ScalebarFrameFill))
+                        script.write('\nscalebar_padding=%s' % self.__gmtMap.ScalebarPadding)
+                    
+                if self.__gmtMap.GridTicks:
+                    script.write('\n##########################################################################################')
+                    script.write('\n#DECLARE MAP GRID TICK SETTINGS')
+                    script.write('\n##########################################################################################')
+                    script.write('\ngrid_tick_interval_x=%s' % self.__gmtMap.GridTickIntervalX)
+                    script.write('\ngrid_tick_interval_y=%s' % self.__gmtMap.GridTickIntervalY)
+                             
                 script.write('\n##########################################################################################')
                 script.write('\n#DECLARE MAP SYMBOLOGY SETTINGS')
                 script.write('\n##########################################################################################')
@@ -173,10 +187,19 @@ class gmtMapScript():
                 script.write('\n#SET THE GMT DEFAULTS')
                 script.write('\n##########################################################################################')
                 script.write('\ngmt set PS_MEDIA ${page_height}${page_size_unit}x${page_width}${page_size_unit}')
-                script.write('\ngmt set MAP_FRAME_TYPE fancy')
-                #if user selects to add a title...
+                script.write('\ngmt set MAP_FRAME_TYPE %s' % self.__gmtMap.MapFrameType.lower())
+                script.write('\ngmt set MAP_FRAME_WIDTH %sp' % self.__gmtMap.MapFrameWidth)
+                script.write('\ngmt set MAP_FRAME_PEN %s,%s' % (self.__gmtMap.MapFrameWidth, self.convertColor(self.__gmtMap.MapFrameColor)))
+                script.write('\ngmt set MAP_GRID_PEN %s,%s' % (self.__gmtMap.GridlineWidth, self.convertColor(self.__gmtMap.GridlineColor)))
+
+                    
+                #If adding the map title...
                 if self.__gmtMap.MapTitleAdd:
-                    script.write('\ngmt set FONT_TITLE %sp,%s,%s' % (self.__gmtMap.MapTitle.size, self.__gmtMap.MapTitle.font, self.convertColor(self.__gmtMap.MapTitle.color)))                    
+                    script.write('\ngmt set MAP_TITLE_OFFSET %s%s' % (self.__gmtMap.MapTitle.offsetX, self.__gmtMap.MapTitle.offsetUnit[:1].lower()))
+                    script.write('\ngmt set FONT_TITLE %sp,%s,%s' % (self.__gmtMap.MapTitle.size, self.__gmtMap.MapTitle.font, self.convertColor(self.__gmtMap.MapTitle.color))) 
+                
+                script.write('\ngmt set FONT_ANNOT_PRIMARY %sp,%s,%s' % (self.__gmtMap.MapFrameFont.size, self.__gmtMap.MapFrameFont.font, self.convertColor(self.__gmtMap.MapFrameFont.color)))
+                
 
                 script.write('\n\n##########################################################################################')
                 script.write('\n#STRETCH THE CPT')
@@ -211,8 +234,17 @@ class gmtMapScript():
                 script.write('\n#CREATE A BASE LAYER FOR PROJECTED DATA')
                 script.write('\n##########################################################################################')
                 script.write('\necho Creating Basemap...')
-                script.write('\ngmt psbasemap -R${RLL} -J${projection} -B${ln}g${ln}/${lt}g${lt}:.\"${map_title}\": -Xc -Yc -K -O -V >> ${out_file}')
-
+                script.write('\ngmt set MAP_ANNOT_OFFSET %s%s' % (self.__gmtMap.MapFrameFont.offsetX, self.__gmtMap.MapFrameFont.offsetUnit[:1].lower()))
+                if self.__gmtMap.GridTicks:
+                    script.write('\ngmt set MAP_TICK_LENGTH %sp' % self.__gmtMap.GridTickLength)
+                    script.write('\ngmt set MAP_TICK_PEN %sp,%s' % (self.__gmtMap.GridTickWidth, self.convertColor(self.__gmtMap.GridTickColor)))
+                    script.write('\ngmt psbasemap -R${RLL} -J${projection} -B${ln}g${ln}f${grid_tick_interval_x}/${lt}g${lt}f${grid_tick_interval_y}:.\"${map_title}\": -Xc -Yc -K -O -V >> ${out_file}')
+                    script.write('\n#The tick settings were only for the map frame; now set them back to default values as not to interfere with other settings later...')
+                else:
+                    script.write('\ngmt psbasemap -R${RLL} -J${projection} -B${ln}g${ln}/${lt}g${lt}:.\"${map_title}\": -Xc -Yc -K -O -V >> ${out_file}')
+                script.write('\n#Put the offset values back to normal after creating basemap...')
+                script.write('\ngmt set MAP_ANNOT_OFFSET 5p')
+                
                 #Place the classification if needed....
                 if self.__gmtMap.MapClassificationAdd:
                     script.write('\n\n##########################################################################################')
@@ -221,36 +253,47 @@ class gmtMapScript():
                     pos = self.getClassificationPosition()
                     script.write('\necho '+ str(pos[0]) + ' ' + str(pos[1]) + ' ${classification} | gmt pstext -R0/${page_width}/0/${page_height} -Jx1i -F+f${classification_font_size}p,${classification_font},${classification_color}+jTC -Xa${classification_offset_x}${classification_offset_unit} -Ya${classification_offset_y}${classification_offset_unit} -O -K -N >> ${out_file}' )
 
-                script.write('\n\n##########################################################################################')
-                script.write('\n#ADD THE MAP SCALEBAR AND COLOR SCHEME')
-                script.write('\n##########################################################################################')
-                script.write('\necho Coloring the map with the color palette...')
-                script.write('\ngmt psscale -C${output_cpt} ')   
-                #For User Defined scale positioning, add the -Dx option
-                if self.getScalebarPositioningCode(self.__gmtMap.ScalebarPositioning) == "UD":
-                    script.write('-Dx${scalebar_x_pos}${scalebar_pos_unit}/${scalebar_y_pos}${scalebar_pos_unit}+w${scalebar_width}${scalebar_width_unit}/${scalebar_height}${scalebar_width_unit}+jTC')
-                else: #For static positioning, add -DJ
-                    script.write('-Xa${scalebar_offset_x}${scalebar_offset_unit} -Ya${scalebar_offset_y}${scalebar_offset_unit} -DJ${scalebar_positioning}+w${scalebar_width}${scalebar_width_unit}/${scalebar_height}${scalebar_width_unit}+jTC')
-
-                if self.__gmtMap.ScalebarOrientation == 'h':
-                    script.write('+h')
-                if self.__gmtMap.ScalebarLabelX:
-                    script.write(' -Bx${scalebar_interval}${scale_units}+l\"' + self.__gmtMap.ScalebarLabelX + '\"')
-                if self.__gmtMap.ScalebarLabelY:
-                    script.write(' -By+l\"' + self.__gmtMap.ScalebarLabelY +'\" ')
-
-                if not self.__gmtMap.ScalebarLabelX and not self.__gmtMap.ScalebarLabelY:
-                    script.write(' -Bx${scalebar_interval}${scale_units} ')
-                if self.__gmtMap.ScalebarIlluminate:
-                    script.write(' -I ')
-                script.write(' -R${RLL} -J${projection}  -O -V >> ${out_file}')
+                if self.__gmtMap.Scalebar:
+                    #Before drawing a scalebar, adjsut the GMT defaults from what was used to draw the map frame
+                    script.write('\ngmt set MAP_TICK_LENGTH %sp' % self.__gmtMap.ScalebarTickLength )
+                    script.write('\ngmt set MAP_TICK_PEN .5,black')
+                    script.write('\n\n##########################################################################################')
+                    script.write('\n#ADD THE MAP SCALEBAR AND COLOR SCHEME')
+                    script.write('\n##########################################################################################')
+                    script.write('\necho Coloring the map with the color palette...')
+                    script.write('\ngmt psscale -C${output_cpt} ')   
+                    #For User Defined scale positioning, add the -Dx option
+                    if self.getScalebarPositioningCode(self.__gmtMap.ScalebarPositioning) == "UD":
+                        script.write('-Dx${scalebar_x_pos}${scalebar_pos_unit}/${scalebar_y_pos}${scalebar_pos_unit}+w${scalebar_width}${scalebar_width_unit}/${scalebar_height}${scalebar_width_unit}+jTC')
+                    else: #For static positioning, add -DJ
+                        script.write('-Xa${scalebar_offset_x}${scalebar_offset_unit} -Ya${scalebar_offset_y}${scalebar_offset_unit} -DJ${scalebar_positioning}+w${scalebar_width}${scalebar_width_unit}/${scalebar_height}${scalebar_width_unit}+jTC')
+    
+                    if self.__gmtMap.ScalebarOrientation == 'h':
+                        script.write('+h')
+                    if self.__gmtMap.ScalebarLabelX:
+                        script.write(' -Bx${scalebar_interval}${scale_units}+l\"' + self.__gmtMap.ScalebarLabelX + '\"')
+                    if self.__gmtMap.ScalebarLabelY:
+                        script.write(' -By+l\"' + self.__gmtMap.ScalebarLabelY +'\" ')
+    
+                    if not self.__gmtMap.ScalebarLabelX and not self.__gmtMap.ScalebarLabelY:
+                        script.write(' -Bx${scalebar_interval}${scale_units} ')
+                    if self.__gmtMap.ScalebarIlluminate:
+                        script.write(' -I ')
+                    if self.__gmtMap.ScalebarFrame:
+                        if self.__gmtMap.ScalebarFilled:
+                            script.write(' -F+p${scalebar_border}+g${scalebar_fill}+c${scalebar_padding}p')
+                        else:
+                            script.write(' -F+p${scalebar_border}+c${scalebar_padding}p')
+                        if self.__gmtMap.ScalebarRounded:
+                            script.write('+r')
+                    script.write(' -R${RLL} -J${projection}  -O -V >> ${out_file}')
                 
 
                 script.write('\n\n##########################################################################################')
                 script.write('\n#CONVERT THE POSTSCRIPT TO THE SELECTED OUTPUT FORMATS')
                 script.write('\n##########################################################################################')
                 if self.__gmtMap.ConvertTypes:
-                    script.write('\n\ngmt psconvert ${out_file} -T' + str(self.__gmtMap.ConvertTypes))
+                    script.write('\ngmt psconvert ${out_file} -T' + str(self.__gmtMap.ConvertTypes))
                      
 
         except Exception as e:

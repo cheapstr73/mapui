@@ -1,0 +1,9 @@
+* Add system feedback - priority
+* Seperate scalebar settings from the map settings - priority 
+* Add custom line size incriments on the custom line color widget (currently inc is hard coded in)
+
+* re-write the routine for font color buttons
+* validate extents (make sure n>s and w>e,  etc) 
+* remove seperate offset text values and place as a font property
+* ensure reasonable default values for all custom controls (i.e. .25 gridlines vs 1.5 map frame, etc)
+* can I combine political boundary types in one call or do they need to be called seperately?

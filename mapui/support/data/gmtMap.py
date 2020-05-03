@@ -1,5 +1,4 @@
 from support.data.gmtMapOptions import gmtMapOptions
-#from support.data.gmtProjection import gmtProjection
 
 ###########################################################################################################################
 #This class will hold all of the properties associated to create a gmtMap. This will be the gmtMap object.

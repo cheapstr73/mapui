@@ -465,26 +465,55 @@ class mainWin(qtw.QDialog):
         self.gmtMap.PageHeight = self.options.spin_page_height.value()
         self.gmtMap.PageWidth = self.options.spin_page_width.value()
         self.gmtMap.PageSizeUnit = self.options.combo_page_size_unit.currentText()   
+        self.gmtMap.MapScaleFactor = self.options.spin_scale_factor.value()
         
         #Map Title
         self.gmtMap.MapTitleAdd = self.options.chk_add_map_title.isChecked()    
         self.gmtMap.MapTitle = gmtFont(self.options.combo_map_title_font.currentText(), 
                                        self.options.spin_map_title_font_size.value(), 
                                        self.options.getMapTitleColor(), 
-                                       self.options.txt_map_title.text().strip())       
-        self.gmtMap.MapTitleOffsetX = self.options.spin_map_title_offset_x.value()
-        self.gmtMap.MapTitleOffsetY = self.options.spin_map_title_offset_y.value()
-        self.gmtMap.MapTitleOffsetUnit = self.options.combo_map_title_offset_unit.currentText()
+                                       self.options.txt_map_title.text().strip(),
+                                       self.options.spin_map_title_offset_x.value(),
+                                       0,
+                                       self.options.combo_map_title_offset_unit.currentText())           
         
         self.gmtMap.MapClassificationAdd = self.options.chk_add_map_classification.isChecked()    
         self.gmtMap.MapClassification = gmtFont(self.options.combo_map_classification_font.currentText(), 
                                                 self.options.spin_map_classification_font_size.value(), 
                                                 self.options.getMapClassificationColor(), 
-                                                self.options.txt_map_classification.text().strip())
-        self.gmtMap.MapClassificationOffsetX = self.options.spin_map_classsification_offset_x.value()
-        self.gmtMap.MapClassificationOffsetY = self.options.spin_map_classsification_offset_y.value()
-        self.gmtMap.MapClassificationOffsetUnit = self.options.combo_map_classification_offset_unit.currentText()
-        #self.gmtMap.MapTitleFontSize = self.options.spin_map_title_font_size.value()
+                                                self.options.txt_map_classification.text().strip(),
+                                                self.options.spin_map_classsification_offset_x.value(),
+                                                self.options.spin_map_classsification_offset_y.value(),
+                                                self.options.combo_map_classification_offset_unit.currentText())
+      
+                
+        ################################################################################
+        #Advanced options window - Map Frame tab
+        ################################################################################
+        self.gmtMap.MapFrameType = self.options.combo_frame_type.currentText()
+        self.gmtMap.MapFrameWidth = self.options.lcbtn_map_frame.getCurrentLineWeight()
+        self.gmtMap.MapFrameColor = self.options.lcbtn_map_frame.getCurrentLineColor() 
+        #Frame Annotations
+        self.gmtMap.MapFrameFont = gmtFont(self.options.combo_frame_font.currentText(),
+                                           self.options.spin_frame_font_size.value(),
+                                           self.options.getMapFrameFontColor(),
+                                           None,
+                                           self.options.spin_frame_offset_value.value(),
+                                           0,
+                                           self.options.combo_frame_offset_unit.currentText()) 
+        #Gridlines
+        self.gmtMap.GridlineWidth = self.options.lcbtn_gridlines.getCurrentLineWeight()
+        self.gmtMap.GridlineColor = self.options.lcbtn_gridlines.getCurrentLineColor()
+        self.gmtMap.GridlineIntervalX = self.options.spin_gridline_interval_x.value()
+        self.gmtMap.GridlineIntervalY = self.options.spin_gridline_interval_y.value()
+        
+        #Grid Ticks
+        self.gmtMap.GridTicks = self.options.chk_grid_ticks.isChecked()
+        self.gmtMap.GridTickWidth = self.options.lcbtn_grid_ticks.getCurrentLineWeight()
+        self.gmtMap.GridTickColor = self.options.lcbtn_grid_ticks.getCurrentLineColor()
+        self.gmtMap.GridTickIntervalX = self.options.spin_grid_tick_interval_x.value()
+        self.gmtMap.GridTickIntervalY = self.options.spin_grid_tick_interval_y.value()
+        self.gmtMap.GridTickLength = self.options.spin_grid_tick_length.value()
         
         ################################################################################
         #Advanced options window - Symbology tab
@@ -517,6 +546,7 @@ class mainWin(qtw.QDialog):
         ################################################################################
         #Advanced options window - Scalebar tab
         ################################################################################    
+        self.gmtMap.Scalebar = self.options.chk_add_scalebar.isChecked()
         self.gmtMap.ScalebarOrientation = 'h' if self.options.radio_horizontal.isChecked() else 'v'     
         self.gmtMap.ScalebarHeight = self.options.spin_scalebar_height.value()
         self.gmtMap.ScalebarWidth = self.options.spin_scalebar_width.value()
@@ -526,8 +556,7 @@ class mainWin(qtw.QDialog):
         self.gmtMap.ScalebarPositioning = self.options.combo_scalebar_position.currentText()  
         self.gmtMap.ScalebarXPos = self.options.spin_scalebar_x.value()
         self.gmtMap.ScalebarYPos = self.options.spin_scalebar_y.value()       
-        self.gmtMap.ScalebarPosUnit = self.options.combo_scalebar_pos_unit.currentText()        
-        self.gmtMap.ScalebarInterval = self.options.spin_scalebar_interval.value()  
+        self.gmtMap.ScalebarPosUnit = self.options.combo_scalebar_pos_unit.currentText()   
         self.gmtMap.ScalebarOffsetX = self.options.spin_scalebar_offset_x.value()
         self.gmtMap.ScalebarOffsetY = self.options.spin_scalebar_offset_y.value()
         self.gmtMap.ScalebarOffsetUnit = self.options.combo_scalebar_offset_unit.currentText()
@@ -535,8 +564,19 @@ class mainWin(qtw.QDialog):
         #Labels
         self.gmtMap.ScalebarLabelX = self.options.txt_scalebar_label_x.text().strip()
         self.gmtMap.ScalebarLabelY = self.options.txt_scalebar_label_y.text().strip()
+        self.gmtMap.ScalebarInterval = self.options.spin_scalebar_interval.value()
+        self.gmtMap.ScalebarTickLength = self.options.spin_scalebar_tick_length.value()
         self.gmtMap.ScalebarIlluminate = self.options.chk_illuminate.isChecked()       
 
+        #Frame
+        self.gmtMap.ScalebarFrame = self.options.chk_scalebar_frame.isChecked()
+        self.gmtMap.ScalebarFrameBorderWidth = self.options.lcbtn_scalebar_frame_border.getCurrentLineWeight()
+        self.gmtMap.ScalebarFrameBorderColor = self.options.lcbtn_scalebar_frame_border.getCurrentLineColor()
+        self.gmtMap.ScalebarFilled = self.options.chk_scalebar_fill.isChecked()
+        self.gmtMap.ScalebarFrameFill  = self.options.cbtn_scalebar_frame_fill.getCurrentFillColor() 
+        self.gmtMap.ScalebarPadding = self.options.spin_scalebar_padding.value()
+        self.gmtMap.ScalebarRounded = self.options.chk_rounded.isChecked()
+        
         #Create the projection
         proj = gmtProjection.projectionList()
         name = self.projections.combo_projections.currentText()
@@ -544,11 +584,11 @@ class mainWin(qtw.QDialog):
             if name == p[0]:
                 self.gmtMap.Projection = gmtProjection()
                 if p[2] == "Cylindrical" or p[2] == "Miscellaneous":
-                    self.gmtMap.Projection.createCylindricProjection(name, self.gmtMap.getCentralMeridian(), self.gmtMap.PageWidth)
+                    self.gmtMap.Projection.createCylindricProjection(name, self.gmtMap.getCentralMeridian(), self.gmtMap.PageWidth, self.gmtMap.MapScaleFactor)
                 elif p[2] == "Azimuthal":
-                    self.gmtMap.Projection.createAzimuthalProjection(name, self.gmtMap.getProjectionCenter(), self.gmtMap.getAzimuth(), self.gmtMap.PageWidth)
+                    self.gmtMap.Projection.createAzimuthalProjection(name, self.gmtMap.getProjectionCenter(), self.gmtMap.getAzimuth(), self.gmtMap.PageWidth, self.gmtMap.MapScaleFactor)
                 elif p[2] == "Conic":
-                    self.gmtMap.Projection.createConicProjection(name, self.gmtMap.getProjectionCenter(), self.gmtMap.get2StandardParallels(), self.gmtMap.PageWidth)
+                    self.gmtMap.Projection.createConicProjection(name, self.gmtMap.getProjectionCenter(), self.gmtMap.get2StandardParallels(), self.gmtMap.PageWidth, self.gmtMap.MapScaleFactor)
                     
         #Package the output types..
         self.gmtMap.ConvertTypes = self.convertFormat         
@@ -587,13 +627,14 @@ class mainWin(qtw.QDialog):
         self.options.spin_page_height.setValue(self.gmtMap.PageHeight)
         self.options.spin_page_width.setValue(self.gmtMap.PageWidth)
         self.options.combo_page_size_unit.setCurrentText(self.gmtMap.PageSizeUnit)
+        self.options.spin_scale_factor.setValue(self.gmtMap.MapScaleFactor)
 
         #Map Title
         self.options.chk_add_map_title.setChecked(self.gmtMap.MapTitleAdd)
         self.options.txt_map_title.setText(self.gmtMap.MapTitle.text)
-        self.options.spin_map_title_offset_x.setValue(self.gmtMap.MapTitleOffsetX)
-        self.options.spin_map_title_offset_y.setValue(self.gmtMap.MapTitleOffsetY)
-        self.options.combo_map_title_offset_unit.setCurrentText(self.gmtMap.MapTitleOffsetUnit)
+        self.options.spin_map_title_offset_x.setValue(self.gmtMap.MapTitle.offsetX)
+        #self.options.spin_map_title_offset_y.setValue(self.gmtMap.MapTitle.offsetY)
+        self.options.combo_map_title_offset_unit.setCurrentText(self.gmtMap.MapTitle.offsetUnit)
         self.options.combo_map_title_font.setCurrentText(self.gmtMap.MapTitle.font)
         self.options.spin_map_title_font_size.setValue(self.gmtMap.MapTitle.size)
         self.options.setMapTitleColor(self.gmtMap.MapTitle.color)
@@ -601,13 +642,41 @@ class mainWin(qtw.QDialog):
         #Map Classification
         self.options.chk_add_map_classification.setChecked(self.gmtMap.MapClassificationAdd)
         self.options.txt_map_classification.setText(self.gmtMap.MapClassification.text)
-        self.options.spin_map_classsification_offset_x.setValue(self.gmtMap.MapClassificationOffsetX)
-        self.options.spin_map_classsification_offset_y.setValue(self.gmtMap.MapClassificationOffsetY)
-        self.options.combo_map_classification_offset_unit.setCurrentText(self.gmtMap.MapClassificationOffsetUnit)        
+        self.options.spin_map_classsification_offset_x.setValue(self.gmtMap.MapClassification.offsetX)
+        self.options.spin_map_classsification_offset_y.setValue(self.gmtMap.MapClassification.offsetY)
+        self.options.combo_map_classification_offset_unit.setCurrentText(self.gmtMap.MapClassification.offsetUnit)        
         self.options.combo_map_classification_font.setCurrentText(self.gmtMap.MapClassification.font)
         self.options.spin_map_classification_font_size.setValue(self.gmtMap.MapClassification.size)
         self.options.setMapClassificationColor(self.gmtMap.MapClassification.color)
 
+        ################################################################################
+        #Advanced options window - Map Frame tab
+        ################################################################################
+        self.options.combo_frame_type.setCurrentText(self.gmtMap.MapFrameType)
+        self.options.lcbtn_map_frame.setCurrentLineWeight(self.gmtMap.MapFrameWidth)
+        self.options.lcbtn_map_frame.setCurrentLineColor(self.gmtMap.MapFrameColor)
+        
+        #Frame Annotations
+        self.options.combo_frame_font.setCurrentText(self.gmtMap.MapFrameFont.font)
+        self.options.spin_frame_font_size.setValue(self.gmtMap.MapFrameFont.size)
+        self.options.setMapFrameFontColor(self.gmtMap.MapFrameFont.color)        
+        self.options.spin_frame_offset_value.setValue(self.gmtMap.MapFrameFont.offsetX)
+        self.options.combo_frame_offset_unit.setCurrentText(self.gmtMap.MapFrameFont.offsetUnit)
+        
+        #Gridlines
+        self.options.lcbtn_gridlines.setCurrentLineWeight(self.gmtMap.GridlineWidth)
+        self.options.lcbtn_gridlines.setCurrentLineColor(self.gmtMap.GridlineColor)
+        self.options.spin_gridline_interval_x.setValue(self.gmtMap.GridlineIntervalX)
+        self.options.spin_gridline_interval_y.setValue(self.gmtMap.GridlineIntervalY)
+        
+        #Grid Ticks
+        self.options.chk_grid_ticks.setChecked(self.gmtMap.GridTicks)
+        self.options.lcbtn_grid_ticks.setCurrentLineWeight(self.gmtMap.GridTickWidth)
+        self.options.lcbtn_grid_ticks.setCurrentLineColor(self.gmtMap.GridTickColor)
+        self.options.spin_grid_tick_interval_x.setValue(self.gmtMap.GridTickIntervalX)
+        self.options.spin_grid_tick_interval_y.setValue(self.gmtMap.GridTickIntervalY)
+        self.options.spin_grid_tick_length.setValue(self.gmtMap.GridTickLength)
+        
         ################################################################################
         #Advanced options window - Symbology Tab
         ################################################################################
@@ -640,6 +709,7 @@ class mainWin(qtw.QDialog):
         ################################################################################
         #Advanced options window - Scalebar Tab
         ################################################################################
+        self.options.chk_add_scalebar.setChecked(self.gmtMap.Scalebar)
         self.options.radio_horizontal.setChecked(True) if self.gmtMap.ScalebarOrientation == 'h' else self.options.radio_vertical.setChecked(True)
         self.options.spin_scalebar_height.setValue(self.gmtMap.ScalebarHeight)
         self.options.spin_scalebar_width.setValue(self.gmtMap.ScalebarWidth)
@@ -658,8 +728,18 @@ class mainWin(qtw.QDialog):
         self.options.txt_scalebar_label_x.setText(self.gmtMap.ScalebarLabelX)
         self.options.txt_scalebar_label_y.setText(self.gmtMap.ScalebarLabelY)
         self.options.spin_scalebar_interval.setValue(self.gmtMap.ScalebarInterval)  
+        self.options.spin_scalebar_tick_length.setValue(self.gmtMap.ScalebarTickLength)
         self.options.chk_illuminate.setChecked(self.gmtMap.ScalebarIlluminate)             
-            
+        
+        #Frame 
+        self.options.chk_scalebar_frame.setChecked(self.gmtMap.ScalebarFrame)
+        self.options.lcbtn_scalebar_frame_border.setCurrentLineWeight(self.gmtMap.ScalebarFrameBorderWidth)
+        self.options.lcbtn_scalebar_frame_border.setCurrentLineColor(self.gmtMap.ScalebarFrameBorderColor)
+        self.options.chk_scalebar_fill.setChecked(self.gmtMap.ScalebarFilled)
+        self.options.cbtn_scalebar_frame_fill.setCurrentFillColor(self.gmtMap.ScalebarFrameFill)
+        self.options.spin_scalebar_padding.setValue(self.gmtMap.ScalebarPadding)
+        self.options.chk_rounded.setChecked(self.gmtMap.ScalebarRounded)
+
         #Map Projection
         if self.gmtMap.Projection:
             self.lbl_projection.setText(self.gmtMap.Projection.Name)

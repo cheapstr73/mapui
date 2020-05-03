@@ -1,4 +1,3 @@
-from support.data.mapuiSettings import mapuiSettings
 class gmtProjection():
     def __init__(self):
         self.Type = 2
@@ -13,23 +12,27 @@ class gmtProjection():
         self.StandardParallel = None
         self.StandardParallels = None
         self.UTMZone = None
+        self.ScalingFactor = None
     
-    def createAzimuthalProjection(self, name, projectionCenter, azimuth, width):
+    def createAzimuthalProjection(self, name, projectionCenter, azimuth, width, scl):
         self.Name = name
         self.ProjectionCenter = projectionCenter
         self.Azimuth = azimuth
         self.Width = width
+        self.ScalingFactor = scl
         
-    def createConicProjection(self, name, projectionCenter, standardParallels, width):
+    def createConicProjection(self, name, projectionCenter, standardParallels, width, scl):
         self.Name = name
         self.ProjectionCenter = projectionCenter
         self.StandardParallels = standardParallels
         self.Width = width 
+        self.ScalingFactor = scl
         
-    def createCylindricProjection(self, name, centralMeridian, width):
+    def createCylindricProjection(self, name, centralMeridian, width, scl):
         self.Name = name
         self.CentralMeridian = centralMeridian        
         self.Width = width
+        self.ScalingFactor = scl
         
     def getProjectionCode(self):
         for item in self.projectionList():
@@ -37,11 +40,11 @@ class gmtProjection():
                # continue
             if self.Name == item[0]:
                 if item[2] == "Cylindrical" or item[2] == "Miscellaneous":
-                    return item[1].upper() + str(self.CentralMeridian) + '/' + str((float(self.Width) * mapuiSettings.getWidthScalingFactor()))
+                    return item[1].upper() + str(self.CentralMeridian) + '/' + str((float(self.Width) * self.ScalingFactor))
                 elif item[2] == "Azimuthal":
-                    return item[1].upper() + str(self.ProjectionCenter) + '/' + str(self.Azimuth) + '/' + str((float(self.Width) * mapuiSettings.getWidthScalingFactor()))
+                    return item[1].upper() + str(self.ProjectionCenter) + '/' + str(self.Azimuth) + '/' + str((float(self.Width) * self.ScalingFactor))
                 elif item[2] == "Conic":
-                    return item[1].upper() + str(self.ProjectionCenter) + '/' + str(self.StandardParallels) + '/' + str((float(self.Width) * mapuiSettings.getWidthScalingFactor()))
+                    return item[1].upper() + str(self.ProjectionCenter) + '/' + str(self.StandardParallels) + '/' + str((float(self.Width) * self.ScalingFactor))
                 
     @staticmethod
     def projectionList():
