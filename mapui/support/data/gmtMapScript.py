@@ -71,7 +71,7 @@ class gmtMapScript():
     def createScript(self):        
         try:
             with open(self.output_directory + '/.' + self.output_basename + '.sh', 'a') as script:
-                script.write("#!/bin/bash")
+                script.write("#!/bin/bash") 
                 script.write('\n##########################################################################################')
                 script.write('\n#SET UP PATH REFERENCES')
                 script.write('\n##########################################################################################')
@@ -119,8 +119,7 @@ class gmtMapScript():
                 script.write('\ncm=%s' % str(self.__gmtMap.getCentralMeridian())) 
                 script.write('\nlt=%s' % str(self.__gmtMap.GridlineIntervalY))
                 script.write('\nln=%s' % str(self.__gmtMap.GridlineIntervalX))
-                #script.write('\nlt=%s' % str(self.__gmtMap.getLatitudeGS()))
-                #script.write('\nln=%s' % str(self.__gmtMap.getLongitudeGS()))
+                
                 #Set the projection
                 projWidth = float(self.__gmtMap.PageWidth) * self.sclFactor
                 script.write('\nprojection2=Q${cm}/%si' % projWidth)
@@ -204,12 +203,13 @@ class gmtMapScript():
                 script.write('\n\n##########################################################################################')
                 script.write('\n#STRETCH THE CPT')
                 script.write('\n##########################################################################################')
+                script.write('\necho Stretching the color palette')
                 script.write('\ngmt makecpt -C${gmt_path}/cpt/$input_cpt -A${cpt_opacity} -T${cpt_min_value}/${cpt_max_value}/${cpt_interval} -Z -V > ${output_cpt}')
 
                 script.write('\n\n##########################################################################################')
                 script.write('\n#CREATE COASTLINE LAYER')
                 script.write('\n##########################################################################################')
-                script.write('\necho Creating Coastlines...')
+                script.write('\necho Creating the coastline layer')
                 #Add rivers
                 if rivers  != '-1':
                     script.write('\ngmt pscoast -R${RLL} -J${projection} -D${coastline_resolution} -W${coast_border_weight}p,${coast_border_color} -G${coast_fill_color} -S${coast_water_color} -N${national_boundaries_type}/${national_boundaries_weight}p,${national_boundaries_color} -I${river_type}/${river_weight}p,${river_color} -Xc -Yc  -K  -V > ${out_file}')
@@ -220,7 +220,7 @@ class gmtMapScript():
                 script.write('\n\n##########################################################################################')
                 script.write('\n#PLOT THE XY DATA FROM THE INPUT FILE')
                 script.write('\n##########################################################################################')
-                script.write('\necho Plotting input points...')
+                script.write('\necho Plotting input x/y points')
                 #script.write('\ngmt psxy ${input_file} -R${RLL} -J${projection} -C${output_cpt} -S${symbol}${symbol_size} -W.05,gray50 -O -K -V >> ${out_file}')
                 #Decide the symbology level...
                 if self.__gmtMap.SymbologyLevel == 0:
@@ -233,7 +233,7 @@ class gmtMapScript():
                 script.write('\n\n##########################################################################################')
                 script.write('\n#CREATE A BASE LAYER FOR PROJECTED DATA')
                 script.write('\n##########################################################################################')
-                script.write('\necho Creating Basemap...')
+                script.write('\necho Creating the basemap')
                 script.write('\ngmt set MAP_ANNOT_OFFSET %s%s' % (self.__gmtMap.MapFrameFont.offsetX, self.__gmtMap.MapFrameFont.offsetUnit[:1].lower()))
                 if self.__gmtMap.GridTicks:
                     script.write('\ngmt set MAP_TICK_LENGTH %sp' % self.__gmtMap.GridTickLength)
@@ -254,19 +254,22 @@ class gmtMapScript():
                     script.write('\necho '+ str(pos[0]) + ' ' + str(pos[1]) + ' ${classification} | gmt pstext -R0/${page_width}/0/${page_height} -Jx1i -F+f${classification_font_size}p,${classification_font},${classification_color}+jTC -Xa${classification_offset_x}${classification_offset_unit} -Ya${classification_offset_y}${classification_offset_unit} -O -K -N >> ${out_file}' )
 
                 if self.__gmtMap.Scalebar:
-                    #Before drawing a scalebar, adjsut the GMT defaults from what was used to draw the map frame
-                    script.write('\ngmt set MAP_TICK_LENGTH %sp' % self.__gmtMap.ScalebarTickLength )
-                    script.write('\ngmt set MAP_TICK_PEN .5,black')
                     script.write('\n\n##########################################################################################')
                     script.write('\n#ADD THE MAP SCALEBAR AND COLOR SCHEME')
                     script.write('\n##########################################################################################')
-                    script.write('\necho Coloring the map with the color palette...')
+                                 
+                    #Before drawing a scalebar, adjsut the GMT defaults from what was used to draw the map frame
+                    script.write('\ngmt set MAP_TICK_LENGTH %sp' % self.__gmtMap.ScalebarTickLength )
+                    script.write('\ngmt set MAP_TICK_PEN .5,black')
+                    script.write('\ngmt set MAP_FRAME_PEN thick,black')
+                    
+                    script.write('\necho Coloring the map')
                     script.write('\ngmt psscale -C${output_cpt} ')   
                     #For User Defined scale positioning, add the -Dx option
                     if self.getScalebarPositioningCode(self.__gmtMap.ScalebarPositioning) == "UD":
-                        script.write('-Dx${scalebar_x_pos}${scalebar_pos_unit}/${scalebar_y_pos}${scalebar_pos_unit}+w${scalebar_width}${scalebar_width_unit}/${scalebar_height}${scalebar_width_unit}+jTC')
+                        script.write('-Dx${scalebar_x_pos}${scalebar_pos_unit}/${scalebar_y_pos}${scalebar_pos_unit}+w${scalebar_width}${scalebar_width_unit}/${scalebar_height}${scalebar_width_unit}+jBL')
                     else: #For static positioning, add -DJ
-                        script.write('-Xa${scalebar_offset_x}${scalebar_offset_unit} -Ya${scalebar_offset_y}${scalebar_offset_unit} -DJ${scalebar_positioning}+w${scalebar_width}${scalebar_width_unit}/${scalebar_height}${scalebar_width_unit}+jTC')
+                        script.write('-Xa${scalebar_offset_x}${scalebar_offset_unit} -Ya${scalebar_offset_y}${scalebar_offset_unit} -DJ${scalebar_positioning}+w${scalebar_width}${scalebar_width_unit}/${scalebar_height}${scalebar_width_unit}+j' + self.getScalebarPositioningCode(self.__gmtMap.ScalebarPositioning))
     
                     if self.__gmtMap.ScalebarOrientation == 'h':
                         script.write('+h')
@@ -277,8 +280,10 @@ class gmtMapScript():
     
                     if not self.__gmtMap.ScalebarLabelX and not self.__gmtMap.ScalebarLabelY:
                         script.write(' -Bx${scalebar_interval}${scale_units} ')
+                        
                     if self.__gmtMap.ScalebarIlluminate:
                         script.write(' -I ')
+                        
                     if self.__gmtMap.ScalebarFrame:
                         if self.__gmtMap.ScalebarFilled:
                             script.write(' -F+p${scalebar_border}+g${scalebar_fill}+c${scalebar_padding}p')
@@ -293,8 +298,9 @@ class gmtMapScript():
                 script.write('\n#CONVERT THE POSTSCRIPT TO THE SELECTED OUTPUT FORMATS')
                 script.write('\n##########################################################################################')
                 if self.__gmtMap.ConvertTypes:
+                    script.write('\necho Exporting the map')
                     script.write('\ngmt psconvert ${out_file} -T' + str(self.__gmtMap.ConvertTypes))
-                     
+                script.write('\necho Process completed.')
 
         except Exception as e:
             m = qtw.QMessageBox()

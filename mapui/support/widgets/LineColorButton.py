@@ -1,8 +1,11 @@
 from PyQt5 import QtWidgets as qtw 
 from PyQt5 import QtGui as qtg 
-
+###########################################################################################################################
+#This class combines a standard push button widget with a double value spin control, while painting a line across the
+#push button to simulate the line width. The spin control adjusts the line width.
+###########################################################################################################################
 class LineColorButton(qtw.QToolButton):
-    def __init__(self, color=qtg.QColor(0,0,0), weight=1.0):
+    def __init__(self, color=qtg.QColor(0,0,0), weight=1.0, increment = 1.0):
         super(LineColorButton, self).__init__()
         
         self.setFixedHeight(30)
@@ -20,7 +23,7 @@ class LineColorButton(qtw.QToolButton):
         self.spinner.setFixedWidth(60)
         self.spinner.setMinimum(.25)
         self.spinner.setMaximum(99.50)
-        self.spinner.setSingleStep(.25)
+        self.spinner.setSingleStep(increment)
         #Make sure the background is transparent...
         pal = self.spinner.palette()
         pal.setColor(9, qtg.QColor(222,0,0, 1))

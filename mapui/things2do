@@ -1,6 +1,6 @@
 * Add system feedback - priority
-* Seperate scalebar settings from the map settings - priority 
-* Add custom line size incriments on the custom line color widget (currently inc is hard coded in)
+* Seperate scalebar settings from the map settings - priority (DONE)
+* Add custom line size incriments on the custom line color widget (currently inc is hard coded in) (DONE)
 
 * re-write the routine for font color buttons
 * validate extents (make sure n>s and w>e,  etc) 

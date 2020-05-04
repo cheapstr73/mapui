@@ -78,15 +78,15 @@ class mapUIOptions(qtw.QDialog):
     ###########################################################################################################################
     def setupMapFrameTab(self):        
         #ColorButton for map frame
-        self.lcbtn_map_frame = LineColorButton()
+        self.lcbtn_map_frame = LineColorButton(qtg.QColor(0,0,0), 1.0, 1.0)
         self.map_frame_color_layout.addWidget(self.lcbtn_map_frame)
         
         #LineColorButton for gridlines
-        self.lcbtn_gridlines = LineColorButton(qtg.QColor(255,0,0), .25)
+        self.lcbtn_gridlines = LineColorButton(qtg.QColor(255,0,0), .25, .25)
         self.map_frame_gridlines_layout.addWidget(self.lcbtn_gridlines) 
         
         #LineColorButton for Grid Ticks 
-        self.lcbtn_grid_ticks = LineColorButton(qtg.QColor(0,0,0), .5)
+        self.lcbtn_grid_ticks = LineColorButton(qtg.QColor(0,0,0), .5, .25)
         self.grid_tick_layout.addWidget(self.lcbtn_grid_ticks)
         
         
@@ -148,11 +148,11 @@ class mapUIOptions(qtw.QDialog):
         self.coastline_border_layout.addWidget(self.lcbtn_coastline_border)
         
         #Coastline National Boundary data 
-        self.lcbtn_national_boundary = LineColorButton()
+        self.lcbtn_national_boundary = LineColorButton(qtg.QColor(170,170,170), .5, .25)
         self.coastline_national_boundary_layout.addWidget(self.lcbtn_national_boundary)
         
         #Coastline River Data...
-        self.lcbtn_rivers = LineColorButton() 
+        self.lcbtn_rivers = LineColorButton(qtg.QColor(85,170,255), .5, .25) 
         self.coastline_river_color_layout.addWidget(self.lcbtn_rivers)
         
         #Setup the control signals
@@ -183,11 +183,11 @@ class mapUIOptions(qtw.QDialog):
         self.combo_map_classification_offset_unit.addItems(mapuiSettings.getUnitsOfMeasure()) 
         #Add the scalebar postioning items to the combo box
         for item in mapuiSettings.getScalebarPositioning():
-            self.combo_scalebar_position.addItem(item[0]) 
-            
+            self.combo_scalebar_position.addItem(item[0])            
             
         #Setup control signals
         self.chk_add_scalebar.stateChanged.connect(self.toggleScalebar)
+        self.chk_scalebar_fill.stateChanged.connect(self.toggleScalebarFill)
         self.chk_scalebar_frame.stateChanged.connect(self.toggleScalebarFrame)
         self.combo_scalebar_position.currentIndexChanged.connect(self.comboPositionChanged)
       
@@ -262,8 +262,7 @@ class mapUIOptions(qtw.QDialog):
             self.combo_map_classification_offset_unit.setEnabled(False)
             self.combo_map_classification_font.setEnabled(False)
             self.spin_map_classification_font_size.setEnabled(False)
-            self.btn_map_classification_font_color.setEnabled(False)
-            
+            self.btn_map_classification_font_color.setEnabled(False)            
 
     ###########################################################################################################################
     #This enables/disables certain controls based on whether grid ticks are being added (map frame tab)
@@ -272,9 +271,13 @@ class mapUIOptions(qtw.QDialog):
         if self.chk_grid_ticks.isChecked():
             self.spin_grid_tick_interval_x.setEnabled(True)
             self.spin_grid_tick_interval_y.setEnabled(True)
+            self.spin_grid_tick_length.setEnabled(True)
+            self.lcbtn_grid_ticks.setEnabled(True)
         else:
             self.spin_grid_tick_interval_x.setEnabled(False)
             self.spin_grid_tick_interval_y.setEnabled(False)
+            self.spin_grid_tick_length.setEnabled(False)
+            self.lcbtn_grid_ticks.setEnabled(False)
             
     def comboPositionChanged(self):
         if self.combo_scalebar_position.currentText() == 'User Defined':
@@ -312,7 +315,6 @@ class mapUIOptions(qtw.QDialog):
             self.combo_symbology_size_unit.setEnabled(True)
             self.cbtn_symbology_fill.setEnabled(True)
             self.spin_symbology_size.setEnabled(True) 
-
 
     ###########################################################################################################################
     #This will open a color chooser dialog and return the chosen color to the approprate sender 
@@ -356,6 +358,7 @@ class mapUIOptions(qtw.QDialog):
             self.spin_scalebar_height.setEnabled(False)
             self.spin_scalebar_width.setEnabled(False)
             self.combo_scalebar_size_unit.setEnabled(False)
+            
     ###########################################################################################################################
     #This enables/disables certain controls based on whether a scalebar frame is being added (scalebar tab)
     ###########################################################################################################################    
@@ -365,13 +368,21 @@ class mapUIOptions(qtw.QDialog):
             self.cbtn_scalebar_frame_fill.setEnabled(True)
             self.chk_scalebar_fill.setEnabled(True)
             self.chk_rounded.setEnabled(True)
+            self.spin_scalebar_padding.setEnabled(True)
+            
         else:
             self.lcbtn_scalebar_frame_border.setEnabled(False)
             self.cbtn_scalebar_frame_fill.setEnabled(False)
             self.chk_scalebar_fill.setEnabled(False) 
             self.chk_rounded.setEnabled(False)
-            
+            self.spin_scalebar_padding.setEnabled(False)
 
+    def toggleScalebarFill(self):
+        if self.chk_scalebar_fill.isChecked():
+             self.cbtn_scalebar_frame_fill.setEnabled(True)
+        else:
+            self.cbtn_scalebar_frame_fill.setEnabled(False)
+                
     ###########################################################################################################################
     #A few helper functions for color controls. This will be re-written later.
     ########################################################################################################################### 

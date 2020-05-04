@@ -8,7 +8,7 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc 
 from PyQt5 import uic
-from os import walk, system, path
+from os import walk, path, setsid, getpgid, killpg
 from support.data.mapuiSettings import mapuiSettings
 from support.data.gmtFont import gmtFont
 from support.data.gmtMap import gmtMap
@@ -17,9 +17,9 @@ from support.data.gmtMapScript import gmtMapScript
 from support.data.gmtProjection import gmtProjection
 from support.view.gmtMapOptionsWin import mapUIOptions
 from support.view.gmtProjectionWin import gmtProjectionWin 
-import sys
-import pickle
-import re
+from support.view.about import about
+from support.view.working import working
+import sys, pickle, re, subprocess, threading
 
 ###########################################################################################################################
 #This class loads the interface.ui file and creates the main interface
@@ -30,7 +30,7 @@ class mainWin(qtw.QDialog):
         uic.loadUi('./support/interfaces/interface.ui', self)
         #CHANGE BACK TO USER HOME DIR WHEN DONE TESTING...
         self.currentDir = "/mnt/566A02716A024E65/MAPUI-BACKUP/GitHub/mapui/"
-
+        
         #Fix the window dimensions
         self.setFixedWidth(510)
         self.setFixedHeight(630)
@@ -112,8 +112,7 @@ class mainWin(qtw.QDialog):
         #Populate the combo boxes with associated values
         self.combo_cpt.addItems(self.populateCPTComboBox())
         self.combo_verbosity.addItems(mapuiSettings.getVerbosity())
-        self.combo_cpt_unit.addItems(mapuiSettings.getCPTUnits())
-      
+        self.combo_cpt_unit.addItems(mapuiSettings.getCPTUnits())      
 
         self.txt_north.setValidator(qtg.QDoubleValidator(-90, 90, 2, self))
         self.txt_south.setValidator(qtg.QDoubleValidator(-90, 90, 2, self))
@@ -129,11 +128,7 @@ class mainWin(qtw.QDialog):
 
         self.btn_execute.setEnabled(False)
         self.monitorControls()
-        self.lockExecute()
-                
-
-    def centerInterface(self):
-        pass
+        self.lockExecute()                
 
     def monitorControls(self):
         self.txt_file_input.textChanged.connect(self.lockExecute)
@@ -205,7 +200,6 @@ class mainWin(qtw.QDialog):
         group.addAction(self.pngAction)
         group.addAction(self.pngTAction)
         group.addAction(self.ppmAction)
-        #group.addAction(self.svgAction)
         group.addAction(self.tiffAction)
 
         #Set the output formats to checkable items...
@@ -216,7 +210,6 @@ class mainWin(qtw.QDialog):
         self.pngAction.setCheckable(True)
         self.pngTAction.setCheckable(True)
         self.ppmAction.setCheckable(True)
-        #self.svgAction.setCheckable(True)
         self.tiffAction.setCheckable(True)
 
         #Add the menu events...
@@ -230,8 +223,8 @@ class mainWin(qtw.QDialog):
         self.pngAction.triggered.connect(lambda status : self.toggleFormat('g'))
         self.pngTAction.triggered.connect(lambda status : self.toggleFormat('G'))
         self.ppmAction.triggered.connect(lambda status : self.toggleFormat('m'))
-        #self.svgAction.triggered.connect(lambda status : self.toggleFormat('s'))
         self.tiffAction.triggered.connect(lambda status : self.toggleFormat('t'))
+        aboutAction.triggered.connect(lambda status: about(self).show())
 
         #Add menu items to the menus
         fileMenu.addAction(saveAction)
@@ -244,7 +237,6 @@ class mainWin(qtw.QDialog):
         self.convertMenu.addAction(self.pngAction)
         self.convertMenu.addAction(self.pngTAction)
         self.convertMenu.addAction(self.ppmAction)
-        #self.convertMenu.addAction(self.svgAction)
         self.convertMenu.addAction(self.tiffAction)
         helpMenu.addAction(aboutAction)
         helpMenu.addAction(helpAction)
@@ -750,13 +742,80 @@ class mainWin(qtw.QDialog):
     #This will execute the shell script. This is only for testing purposes. This is a placeholder until a more 'robust' 
     #procedure is written
     ###########################################################################################################################         
-    def executeScript(self):
+    def executeScript(self):   
+        #Do some basic validations (North is greater than South...etc)
+        check = self.validateForm() 
+        if check is not None: #If message is returned, show the error and exit the function
+            self.showMessage(3, 'Error', check)
+            return
+        
+        #If here, then validation passed
+        self.validForm = True;      
         self.createMapObject()  
-        gmtMapScript(self.gmtMap)
-        cmd = "cd \'" +  path.split(self.gmtMap.FileOutput)[0] + "\' && sh ." + path.split(self.gmtMap.FileOutput)[1][:-3] + '.sh'                  
-        system(cmd)
-        self.showMessage(1, "", "Process Completed!")
+        
+        #Create the shell script
+        gmtMapScript(self.gmtMap)     
+        
+        #Create the working window
+        self.workingWin = working(self)
+        self.workingWin.show()
+        self.workingWin.start()
+       
+        #Create a thread for the process
+        job = threading.Thread(target=self.processMap) 
+        self.workingWin.btn_close.clicked.connect(lambda status: self.cancelThread())
+        job.start() 
+        
+        #While the thread is still going...
+        while job.isAlive():   
+            #Make sure GUI doesn't freeze...
+            qtc.QCoreApplication.processEvents()
+            
+        job._stop()
+        self.workingWin.stop()
+        self.workingWin.close()
+    
+    ###########################################################################################################################
+    #This will get the process id of the process group...and kill it. (When cancel button is pressed)
+    ###########################################################################################################################  
+    def cancelThread(self):
+        pgrp = getpgid(self.process.pid)
+        killpg(pgrp, 9)
+        self.showMessage(2,"Cancelled", "Process cancelled by user!")
+        
+    ###########################################################################################################################
+    #This will start a python subprocess in a seperate thread. Running in a seperate thread will allow the reading of stdout
+    #in real-time without blocking the GUI.
+    ###########################################################################################################################      
+    def processMap(self):           
+        #self.createMapObject()          
+        #Create the shell script
+        #gmtMapScript(self.gmtMap)     
+       
+        #Need to cd into the output directory before runnin the script
+        cmd1 = "cd \'" +  path.split(self.gmtMap.FileOutput)[0] + "\'"
+        cmd2  = "sh ." + path.split(self.gmtMap.FileOutput)[1][:-3] + '.sh' 
+        
+        #Here, create a new subprocesss using cmd1 and cmd2 and set the process up as a group so we can kill the process group if needed latere
+        self.process = subprocess.Popen(["{};{}".format(cmd1, cmd2)], universal_newlines=True, shell=True, stdout=subprocess.PIPE, preexec_fn=setsid)
+        
+        #While this thing is running, get the stdout from the process and update the working window
+        while self.process.poll() is None:
+            line = self.process.stdout.readline()
+            self.workingWin.write(line)
 
+    ###########################################################################################################################
+    #This will do a quick check to make sure the input values make sense. Most validation is done on the GUI side, with 
+    #control limits set, but here just make sure north values are greater than south...etc
+    ###########################################################################################################################  
+    def validateForm(self):
+        if float(self.txt_south.text()) >= float(self.txt_north.text()):
+            return "Southern coordinate must be less than the northern coordinate."
+        elif float(self.txt_east.text()) >= float(self.txt_west.text()):
+            return "Eastern coordinate must be less than the western coordinate."
+        elif float(self.txt_cpt_min.text()) >= float(self.txt_cpt_max.text()):
+            return "Mininum range value must be less than the maximum range value."
+        
     ###########################################################################################################################
     #Testing function....this will go away in the end...
     ########################################################################################################################### 
