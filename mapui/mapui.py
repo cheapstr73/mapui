@@ -104,7 +104,6 @@ class mainWin(qtw.QDialog):
         self.projections.submitted.connect(self.lbl_projection.setText)        
         self.btn_set_projection.clicked.connect(self.openProjections)
 
-
         #Populate the combo boxes with associated values
         self.combo_cpt.addItems(self.populateCPTComboBox())
         self.combo_verbosity.addItems(mapuiSettings.getVerbosity())
@@ -124,8 +123,12 @@ class mainWin(qtw.QDialog):
 
         self.btn_execute.setEnabled(False)
         self.monitorControls()
-        self.lockExecute()                
-
+        self.lockExecute()   
+             
+    ###########################################################################################################################
+    #Attach control change events to major controls to the lock widgets function. This keeps the execute button disabled
+    #until all of the following items are filled out.
+    ###########################################################################################################################
     def monitorControls(self):
         self.txt_file_input.textChanged.connect(self.lockExecute)
         self.txt_north.textChanged.connect(self.lockExecute)
@@ -139,6 +142,9 @@ class mainWin(qtw.QDialog):
         self.txt_file_output.textChanged.connect(self.lockExecute)
         self.projections.submitted.connect(self.lockExecute)
 
+    ###########################################################################################################################
+    # This keeps the execute button disabled until all of the following items are filled out.
+    ###########################################################################################################################
     def lockExecute(self):
         if (not self.txt_file_input.text() or 
         not self.txt_north.text() or
