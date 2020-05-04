@@ -1,8 +1,4 @@
 #!/usr/bin/python
-####################### NEED TO DO ITEMS ####################
-#Verify all settings before enabling the execute button
-#Verify all max values are greater than min values...
-#Do a better job of verifying .map file load!
 
 from PyQt5 import QtWidgets as qtw 
 from PyQt5 import QtGui as qtg

@@ -14,6 +14,11 @@ class mapUIOptions(qtw.QDialog):
     def __init__(self, *args, **kwargs):
         super(mapUIOptions, self).__init__(*args, **kwargs) 
         uic.loadUi('./support/interfaces/options.ui', self)
+        
+        #Fix the window dimensions
+        self.setFixedWidth(489)
+        self.setFixedHeight(565)
+        
         self.setupInterface()  
         
         #Setup the control initializations on each tab
