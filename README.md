@@ -16,6 +16,6 @@ The main application executable python file is located in the project root. All 
 * images: Screenshots used to develop the help files.
 * Interfaces: The QT Designer .ui files for each interface.
 * views: The front-end code for each interface (options window, projections window, etc.) in order to set up widget states and actions.
-* widgtes: Any custom widget created for this project.
+* widgtes: Any custom subclassed widgets created for this project.
 
 ![User Interface](/mapui/support/images/example.png)

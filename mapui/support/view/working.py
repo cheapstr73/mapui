@@ -13,12 +13,14 @@ class working(qtw.QDialog):
         self.setModal(True)
         self.setFixedHeight(115)
         self.setFixedWidth(300)
+        self.write("Initializing")
         
     #Start the animated gif spinning
     def start(self):
         self.gif = qtg.QMovie('./support/icons/spinner3.gif')
         self.lbl_spinner.setMovie(self.gif)
         self.gif.start()
+        
     #Stop the animated gif
     def stop(self):
         self.gif.stop()

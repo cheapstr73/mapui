@@ -1,19 +1,24 @@
+###########################################################################################################################
+#This handles the projection info. GMT projections can be declared two different ways (hence the lower case and capital 
+#case projection code). At this time this class handles the 2nd method, in which the projection code can be deteremined
+#based on the extents of the current map. No user input is needed. The first method will require user input and will be
+#added to this class at a later time. 
+###########################################################################################################################
 class gmtProjection():
-    def __init__(self):
-        self.Type = 2
+    def __init__(self): 
         self.Name = None
         self.CentralMeridian = None
         self.Width = None
-        self.Azimuth = None
-        #Set these to None, I will code this portion later; right now doing the basics (above)
-        self.Scale = None
+        self.Azimuth = None  
         self.Code = None
         self.ProjectionCenter = None
         self.StandardParallel = None
-        self.StandardParallels = None
-        self.UTMZone = None
+        self.StandardParallels = None 
         self.ScalingFactor = None
-    
+        
+    ###########################################################################################################################
+    #Create each projection by projection Categoory
+    ########################################################################################################################### 
     def createAzimuthalProjection(self, name, projectionCenter, azimuth, width, scl):
         self.Name = name
         self.ProjectionCenter = projectionCenter
@@ -34,6 +39,9 @@ class gmtProjection():
         self.Width = width
         self.ScalingFactor = scl
         
+    ###########################################################################################################################
+    #This method will return the GMT code to use for the appropriate projection. 
+    ###########################################################################################################################        
     def getProjectionCode(self):
         for item in self.projectionList():
            # if item[0].startswith('*'):
@@ -46,10 +54,13 @@ class gmtProjection():
                 elif item[2] == "Conic":
                     return item[1].upper() + str(self.ProjectionCenter) + '/' + str(self.StandardParallels) + '/' + str((float(self.Width) * self.ScalingFactor))
                 
+    ###########################################################################################################################
+    #This is a static method used to populate the projection combo box and any lists of projections used. Returns a tuple 
+    #containing the projection name and the (capital version) alphabetic character for that projection.
+    ###########################################################################################################################                
     @staticmethod
     def projectionList():
-        proj = [
-                
+        proj = [                
             ["*Azimuthal Projections", "-1", "-1"],
             ["Azimuthal Equidistant Projection", "E", "Azimuthal"],
             ["Gnomonic Projection", "F", "Azimuthal"],
@@ -81,6 +92,9 @@ class gmtProjection():
         ]
         return proj
     
+    ###########################################################################################################################
+    #The properties for the projection class
+    ###########################################################################################################################   
     @property
     def Azimuth(self):
         return self.__Azimuth 

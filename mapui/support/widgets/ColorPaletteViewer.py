@@ -41,6 +41,9 @@ class PaletteViewer(qtw.QWidget):
         #Add the layout to the widget     
         self.setLayout(self.layout)   
 
+    ###########################################################################################################################
+    #Since the painting is added to the layout, this will clear the layout; so as to not add mutiple painted objects.
+    ###########################################################################################################################
     def clearLayout(self, layout):
         if layout is not None:
             while layout.count():
@@ -148,11 +151,11 @@ class PaletteViewer(qtw.QWidget):
                         else:
                             self.__showMessage(1, "Cannot find RGB Code for \'" + tmpColor2 + "\'") 
 
-                    #If here, first character was a digit, so look for a forward slash ('/') or a comma (',) - RGB's will be seperated by one of these
+                    #If here, first character was a digit, so look for a forward slash ('/') or a comma (',) - RGB's will be separated by one of these
                     elif  '/' in tmpColor2: #GMT RGB values like the '/', but we don't need that here...
                         tmpColor2 = tmpColor2.replace('/',',') 
                         
-                    if ',' in tmpColor2: #RGB values should be comma seperated                    
+                    if ',' in tmpColor2: #RGB values should be comma separated                    
                         if len(tmpColor2.split(',')) == 3:                            
                             colorList.append(tmpColor2) #We have a 3 part number, so add to the list     
                             continue                   
@@ -268,74 +271,81 @@ class _PaintedPalette(qtw.QWidget):
             self.__drawRectangleR(painter)
         painter.end()
 
+
+    ###########################################################################################################################
+    #Paint the gradient 'Forward', from start to end. Yes, we have to read the list from back to front for this!
+    ###########################################################################################################################
     def __drawRectangleF(self, qp):
         pos = 1 / len(self.lines)
         start = 0
 
+        #Set the gradient to about 10 pixels shorter and the width of the parent control...
         lg = qtg.QLinearGradient(215, 0, 0.0, 0.0)   
-        #We need to go from back to front to display the gradient in the correct order...    
-               
+
+        #Start the list from the back and split the columms               
         for line in reversed(self.lines):
             cols = line.split()
-            rough = cols[-1]            
-            #f.write(rough + '\n')
-            if ',' in rough: #Create color from RGB
+            rough = cols[-1]        
+            
+            if ',' in rough: #Create color from RGB; RGB's should be comma separated here
                 splitColor = rough.split(',')                    
-                r = int(splitColor[0])
-                g = int(splitColor[1])
-                b = int(splitColor[2])
-                a = self.opacity
-                color = qtg.QColor(r,g,b,a)
+                r = int(splitColor[0]) #red
+                g = int(splitColor[1]) #green
+                b = int(splitColor[2]) #blue
+                a = self.opacity #and..the opacity
+                color = qtg.QColor(r,g,b,a) #set the new color with the rgba
 
-            elif '-'  in rough: #Create color from HSV
-                splitColor = rough.split('-')
-                #f.write(rough + '\n')
-                h = int(splitColor[0])
-                s = int(splitColor[1])
-                v = int(splitColor[2])
-                a = self.opacity
-                color = qtg.QColor()
+            elif '-'  in rough: #Create color from HSV; HSV's are dash separated
+                splitColor = rough.split('-') 
+                h = int(splitColor[0]) #hue
+                s = int(splitColor[1]) #saturation
+                v = int(splitColor[2]) #value
+                a = self.opacity #and...opacity
+                color = qtg.QColor() #set the new color with hsva
                 color.setHsv(h,s,v,a)
 
-            lg.setColorAt(start, color)
-            start += pos
+            lg.setColorAt(start, color) #set the gradient color at the current position
+            start += pos #increase the current position...
 
         qp.setPen(qtg.QColor(215,215,215))
         qp.setBrush(lg) 
         rect = qtc.QRectF(0, 0, 215, 18.0)
         qp.drawRect(rect)
   
+    ###########################################################################################################################
+    #Paint the gradient 'Reverse'
+    ###########################################################################################################################
     def __drawRectangleR(self, qp):
         pos = 1 / len(self.lines)
         start = 0
 
+        #Set the gradient to about 10 pixels shorter and the width of the parent control...
         lg = qtg.QLinearGradient(215, 0, 0.0, 0.0)   
-        #We need to go from back to front to display the gradient in the correct order...    
-               
+
+        #Start the list from the front this time split the columms               
         for line in self.lines:
             cols = line.split()
-            rough = cols[-1]            
-            #f.write(rough + '\n')
-            if ',' in rough: #Create color from RGB
+            rough = cols[-1]        
+            
+            if ',' in rough: #Create color from RGB; RGB's should be comma separated here
                 splitColor = rough.split(',')                    
-                r = int(splitColor[0])
-                g = int(splitColor[1])
-                b = int(splitColor[2])
-                a = self.opacity
-                color = qtg.QColor(r,g,b,a)
+                r = int(splitColor[0]) #red
+                g = int(splitColor[1]) #green
+                b = int(splitColor[2]) #blue
+                a = self.opacity #and..the opacity
+                color = qtg.QColor(r,g,b,a) #set the new color with the rgba
 
-            elif '-'  in rough: #Create color from HSV
-                splitColor = rough.split('-')
-                #f.write(rough + '\n')
-                h = int(splitColor[0])
-                s = int(splitColor[1])
-                v = int(splitColor[2])
-                a = self.opacity
-                color = qtg.QColor()
+            elif '-'  in rough: #Create color from HSV; HSV's are dash separated
+                splitColor = rough.split('-') 
+                h = int(splitColor[0]) #hue
+                s = int(splitColor[1]) #saturation
+                v = int(splitColor[2]) #value
+                a = self.opacity #and...opacity
+                color = qtg.QColor() #set the new color with hsva
                 color.setHsv(h,s,v,a)
 
-            lg.setColorAt(start, color)
-            start += pos
+            lg.setColorAt(start, color) #set the gradient color at the current position
+            start += pos #increase the current position...
 
         qp.setPen(qtg.QColor(215,215,215))
         qp.setBrush(lg) 

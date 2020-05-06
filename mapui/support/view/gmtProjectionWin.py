@@ -4,6 +4,10 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import uic
 from support.data.gmtProjection import gmtProjection 
 
+###########################################################################################################################
+#This is the interface for the projections. It contains a combo box populated with a list of projections, a projection
+#icon and a projection description.
+###########################################################################################################################
 class gmtProjectionWin(qtw.QDialog):
     #Create a custom signal for the 'Submit' button
     submitted = qtc.pyqtSignal(str)   
@@ -11,36 +15,43 @@ class gmtProjectionWin(qtw.QDialog):
     def __init__(self, *args, **kwargs):
         super(gmtProjectionWin, self).__init__(*args, **kwargs) 
         uic.loadUi('./support/interfaces/projection.ui', self)
+        
+        #Make sure the window is not resizable
         self.setFixedWidth(455)
         self.setFixedHeight(375)
         self.setWindowIcon(qtg.QIcon('./support/icons/globe2.png'))
+        
+        #Add a couple of unicode up/down arrows for the more info label
         self.downArrow = '\u2b9f'
         self.upArrow = '\u2b9d'
+        
+        #Is the window expanded?
         self.expanded = True
         self.toggleMoreInfo()
         
-        self.btn_submit.clicked.connect(self.onSubmit)
+        #Set the icons to be used
         self.btn_submit.setIcon(qtg.QIcon('./support/icons/ok2.png'))
         self.lbl_icon.setScaledContents(True)
         self.lbl_icon.setAlignment(qtc.Qt.AlignVCenter)
         self.lbl_icon.setPixmap(qtg.QPixmap('./support/icons/projections/CylindricalEquidistantProjection.png'))
         
-
+        #Create a dictionary of projecion names to function names
         self.createDictionary()  
+        
+        #Populate the projection names in the combo box
         self.populateProjectionComboBox()  
         
-        self.combo_projections.currentIndexChanged.connect(self.currentIndexChanged)    
+        #Set up the button click and combo box signals
+        self.btn_submit.clicked.connect(self.onSubmit)
+        self.combo_projections.currentIndexChanged.connect(self.currentIndexChanged)            
         self.currentIndexChanged()
         
         #Set the more information label as 'clickable'
         self.lbl_more_information.mousePressEvent = self.lblMoreInformationClicked
-        self.lbl_more_information.setCursor(qtc.Qt.PointingHandCursor)
-        
-        return
-        
+        self.lbl_more_information.setCursor(qtc.Qt.PointingHandCursor)       
         
     ###########################################################################################################################
-    #This will populate the items in the projection combo box. The list is retrieve from the gmtProjection class and each
+    #This will populate the items in the projection combo box. The list is retrieved from the gmtProjection class and each
     #projection 'Category' is preceded by an asterick '*'. These items will be populated as a group header.
     ###########################################################################################################################
     def populateProjectionComboBox(self):
@@ -102,8 +113,7 @@ class gmtProjectionWin(qtw.QDialog):
     def swapIcon(self):
         path = './support/icons/projections/'
         name = self.combo_projections.currentText().replace(' ', '') + '.png'
-        self.lbl_icon.setPixmap(qtg.QPixmap(path + name))
-     
+        self.lbl_icon.setPixmap(qtg.QPixmap(path + name))     
     
     def lblMoreInformationClicked(self, event):
         self.toggleMoreInfo()
@@ -119,8 +129,7 @@ class gmtProjectionWin(qtw.QDialog):
             self.expanded = True
         else:
             return 
-        self.update()
-            
+        self.update()            
         
    ###########################################################################################################################
    #There is a function for each projection in the list. This will control how the UI items get displayed.

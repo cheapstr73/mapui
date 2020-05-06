@@ -1,10 +1,8 @@
-#from support.data.gmtMap import gmtMap
-from support.data.mapuiSettings import mapuiSettings
-#from support.data.gmtFont import gmtFont
+from support.data.mapuiSettings import mapuiSettings 
 from PyQt5 import QtWidgets as qtw
-#from PyQt5 import QtGui as qtg
+ 
 ###########################################################################################################################
-#This class will take a gmtMap object and output a shell script to feed into GMT
+#This class will take a gmtMap object and output a shell script to feed into GMT. 
 ###########################################################################################################################
 class gmtMapScript():
     def __init__(self, gmtMap): 
@@ -13,7 +11,7 @@ class gmtMapScript():
         self.gmtPath = mapuiSettings.getGMTPath() 
         self.output = gmtMap.FileOutput
         
-        try:
+        try: #Strip out the basename, remove extensions and get base path from the output
             self.output_basename = gmtMap.FileOutput[gmtMap.FileOutput.rfind('/')+1:][:-3]
             self.output_directory = gmtMap.FileOutput[:gmtMap.FileOutput.rfind('/')+1:]
             self.output_ps = self.output_directory + '/' + self.output_basename + ".ps"
@@ -25,29 +23,45 @@ class gmtMapScript():
             q.exec()
         self.createScript()
 
+    ###########################################################################################################################
+    #Get the GMT code for the X/Y symbol to be used. The getSymbols() method returns a tuple with the symbol name and code.
+    ###########################################################################################################################
     def getSymCode(self, sym):
         for item in mapuiSettings.getSymbols():
             if sym == item[0]:
                 return item[1]
         return None
+    
+    ###########################################################################################################################
+    #Get the GMT code for the political boundaries. The getBorderTypes() method returns a tuple with the type name and code.
+    ###########################################################################################################################
     def getNationaBoundaryCode(self, c):
         for item in mapuiSettings.getBorderTypes():
             if c == item[0]:
                 return item[1]
         return None
 
+    ###########################################################################################################################
+    #Get the GMT code for the rivers. The getRiverTypes() method returns a tuple with the river type and code.
+    ###########################################################################################################################
     def getRiverTypeCode(self, c):
         for item in mapuiSettings.getRiverTypes():
             if c == item[0]:
                 return item[1]
         return None 
 
+    ###########################################################################################################################
+    #Get the GMT code for the scalebar position. The getScalebarPositioning() method returns a tuple with the position and code.
+    ###########################################################################################################################
     def getScalebarPositioningCode(self, p):
         for item in mapuiSettings.getScalebarPositioning():
             if p == item[0]:
                 return item[1]
         return None 
  
+    ###########################################################################################################################
+    #Calculates the top center of the page, in order to place the classification.
+    ###########################################################################################################################
     def getClassificationPosition(self):
         x = float(self.__gmtMap.ROIWest) - float(self.__gmtMap.ROIEast)
         y = float(self.__gmtMap.ROINorth) - float(self.__gmtMap.ROISouth)
@@ -57,7 +71,10 @@ class gmtMapScript():
         XAxis = (self.__gmtMap.PageWidth * self.sclFactor) / 2
         YAxis2 = (self.__gmtMap.PageHeight - YAxis) / 2
         return [XAxis, YAxis+YAxis2]
-
+    
+    ###########################################################################################################################
+    #Converts a QColor object to a GMT readable color ('/' separated rgb values)
+    ###########################################################################################################################
     def convertColor(self, color):
         #color = qtg.QColor(color)
         r = color.red()
@@ -66,7 +83,8 @@ class gmtMapScript():
         return str(r) + '/' + str(g) + '/' + str(b)
 
     ###########################################################################################################################
-    #The script is written from top to bottom one line at a time...
+    #The script is written from top to bottom one line at a time...It's messy, but writing one line at a time (with the exception
+    #of conditional statements) makes it easier to find where to make changes.
     ###########################################################################################################################
     def createScript(self):        
         try:
@@ -107,6 +125,7 @@ class gmtMapScript():
                 script.write('\ncpt_min_value=%s' % self.__gmtMap.CPTMinValue)
                 script.write('\ncpt_max_value=%s' % self.__gmtMap.CPTMaxValue)
                 script.write('\ncpt_interval=%s' % self.__gmtMap.CPTInterval)
+                
                 #In order to get the transparency correct in GMT, subtract the sliders opacity value from 100
                 script.write('\ncpt_opacity=%s' % str(100 - int(self.__gmtMap.Opacity )))
 

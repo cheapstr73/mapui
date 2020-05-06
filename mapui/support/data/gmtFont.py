@@ -1,6 +1,13 @@
 from PyQt5.QtGui import QColor as qc 
+###########################################################################################################################
+#This class hold the font information for all of the text on the map (title, classification, grid numbers, etc.) 
+#It holds the font face, color, and size. Also, to avoid alot of duplication, it also holds the ofset values, offset
+#units and any text that it may display.
+###########################################################################################################################
+
 class gmtFont():
-    def __init__(self, fFont = 'Helvetica-Bold', fSize = 18, fColor=qc(0,0,0), fText='', offsetx=0, offsety =0, offsetunit='Points'):
+    #In the constructor all parameters are optional, but for certain text pieces, you may want to set them)
+    def __init__(self, fFont='Helvetica-Bold', fSize=18, fColor=qc(0,0,0), fText='', offsetx=0, offsety =0, offsetunit='Points'):
         self.font = fFont
         self.size = fSize
         self.color = fColor 
@@ -8,7 +15,10 @@ class gmtFont():
         self.offsetX = offsetx
         self.offsetY = offsety
         self.offsetUnit = offsetunit
-        
+   
+    ###########################################################################################################################
+    #The font class properties. 
+    ###########################################################################################################################     
     @property
     def font(self):
         return self.__font
