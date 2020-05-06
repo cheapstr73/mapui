@@ -1,7 +1,7 @@
 # mapui
 
 ### About:
-The GMT Map User Interface (MapUI) is a front-end module for creating maps using the [Generic Mapping Tools (GMT)](https://gmt.soest.hawaii.edu/) in a Linux environment. 
+The GMT Map User Interface (MapUI) is a front-end module for creating maps using the [Generic Mapping Tools (GMT)](https://gmt.soest.hawaii.edu/){:target="_blank"} in a Linux environment. 
 
 This project is currently still in production. Version 1.0 accepts plain text files consisting of X/Y points and plots those points on a GMT map. Ingesting and mapping binary raster data will be incorporated in the next version. 
 
