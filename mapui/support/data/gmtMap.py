@@ -44,6 +44,13 @@ class gmtMap(gmtMapOptions):
         self.__CPTMinValue = cptMinValue
 
     @property 
+    def CPTReverse(self):
+        return self.__CPTReverse 
+    @CPTReverse.setter 
+    def CPTReverse(self, r):
+        self.__CPTReverse = r
+        
+    @property 
     def FileInput(self):
         return self.__FileInput 
     @FileInput.setter 
@@ -126,6 +133,7 @@ class gmtMap(gmtMapOptions):
         self.CPTMaxValue = '100'
         self.CPTInterval = '10'
         self.ScaleUnit = 'mgals'
+        self.CPTReverse = False
         self.Projection = None
         self.FileOutput = None
 

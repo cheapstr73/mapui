@@ -102,7 +102,7 @@ class gmtMapScript():
                 script.write('\n##########################################################################################')
                 script.write('\n#DECLARE COLOR PALETTE INFO')
                 script.write('\n##########################################################################################')
-                script.write('\noutput_cpt=file.cpt')
+                script.write('\noutput_cpt=%s.cpt' % self.output_basename)
                 script.write('\ninput_cpt=%s' % self.__gmtMap.CPTFile)
                 script.write('\ncpt_min_value=%s' % self.__gmtMap.CPTMinValue)
                 script.write('\ncpt_max_value=%s' % self.__gmtMap.CPTMaxValue)
@@ -204,7 +204,10 @@ class gmtMapScript():
                 script.write('\n#STRETCH THE CPT')
                 script.write('\n##########################################################################################')
                 script.write('\necho Stretching the color palette')
-                script.write('\ngmt makecpt -C${gmt_path}/cpt/$input_cpt -A${cpt_opacity} -T${cpt_min_value}/${cpt_max_value}/${cpt_interval} -Z -V > ${output_cpt}')
+                if self.__gmtMap.CPTReverse:
+                    script.write('\ngmt makecpt -C${gmt_path}/cpt/$input_cpt -A${cpt_opacity} -T${cpt_min_value}/${cpt_max_value}/${cpt_interval} -Ic -Z -V > ${output_cpt}')
+                else:
+                    script.write('\ngmt makecpt -C${gmt_path}/cpt/$input_cpt -A${cpt_opacity} -T${cpt_min_value}/${cpt_max_value}/${cpt_interval} -Z -V > ${output_cpt}')
 
                 script.write('\n\n##########################################################################################')
                 script.write('\n#CREATE COASTLINE LAYER')

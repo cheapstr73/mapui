@@ -55,9 +55,10 @@ class PaletteViewer(qtw.QWidget):
     #This method does the initial read-in of a .cpt file. It takes a string parameter for the cptFile filename and an integer
     #parameter (0-255) to represent the alpha value (opacity).
     ###########################################################################################################################
-    def DrawPalette(self, cptFile, opacity=255):   
+    def DrawPalette(self, cptFile, normal=True, opacity=255):   
         self.clearLayout(self.layout)   
-
+        self.normal = normal #For normally drawn CPT (colors not reversed)
+        
         #If file if null or emtpy, just return...         
         if not cptFile: 
             return  
@@ -83,7 +84,7 @@ class PaletteViewer(qtw.QWidget):
                 self.TotalColors = len(lines) + 1 
 
                 colors = self.__processColors(lines)   
-                self.layout.addWidget(_PaintedPalette(colors, self.opacity))
+                self.layout.addWidget(_PaintedPalette(colors, self.normal, self.opacity))
 
         except Exception as e:
             self.__showMessage(3, str(e))
@@ -248,31 +249,35 @@ class PaletteViewer(qtw.QWidget):
 class _PaintedPalette(qtw.QWidget):
     color = None
     size = 0
-    def __init__(self, colorList, opacity):
+    def __init__(self, colorList, normal, opacity):
         super(_PaintedPalette, self).__init__()
 
         self.setFixedHeight(19)
         self.setFixedWidth(220)         
         self.lines = colorList
-        self.opacity = opacity
+        self.normal = normal
+        self.opacity = opacity        
         self.update()
 
     def paintEvent(self, e):
         painter = qtg.QPainter()
         painter.begin(self)
-        self.__drawRectangle(painter)
+        if not self.normal:
+            self.__drawRectangleF(painter)
+        else:
+            self.__drawRectangleR(painter)
         painter.end()
 
-    def __drawRectangle(self, qp):
+    def __drawRectangleF(self, qp):
         pos = 1 / len(self.lines)
         start = 0
 
-        lg = qtg.QLinearGradient(215, 0, 0.0, 0.0)
-
+        lg = qtg.QLinearGradient(215, 0, 0.0, 0.0)   
         #We need to go from back to front to display the gradient in the correct order...    
-        for line in reversed(self.lines):            
+               
+        for line in reversed(self.lines):
             cols = line.split()
-            rough = cols[-1]
+            rough = cols[-1]            
             #f.write(rough + '\n')
             if ',' in rough: #Create color from RGB
                 splitColor = rough.split(',')                    
@@ -300,3 +305,39 @@ class _PaintedPalette(qtw.QWidget):
         rect = qtc.QRectF(0, 0, 215, 18.0)
         qp.drawRect(rect)
   
+    def __drawRectangleR(self, qp):
+        pos = 1 / len(self.lines)
+        start = 0
+
+        lg = qtg.QLinearGradient(215, 0, 0.0, 0.0)   
+        #We need to go from back to front to display the gradient in the correct order...    
+               
+        for line in self.lines:
+            cols = line.split()
+            rough = cols[-1]            
+            #f.write(rough + '\n')
+            if ',' in rough: #Create color from RGB
+                splitColor = rough.split(',')                    
+                r = int(splitColor[0])
+                g = int(splitColor[1])
+                b = int(splitColor[2])
+                a = self.opacity
+                color = qtg.QColor(r,g,b,a)
+
+            elif '-'  in rough: #Create color from HSV
+                splitColor = rough.split('-')
+                #f.write(rough + '\n')
+                h = int(splitColor[0])
+                s = int(splitColor[1])
+                v = int(splitColor[2])
+                a = self.opacity
+                color = qtg.QColor()
+                color.setHsv(h,s,v,a)
+
+            lg.setColorAt(start, color)
+            start += pos
+
+        qp.setPen(qtg.QColor(215,215,215))
+        qp.setBrush(lg) 
+        rect = qtc.QRectF(0, 0, 215, 18.0)
+        qp.drawRect(rect)

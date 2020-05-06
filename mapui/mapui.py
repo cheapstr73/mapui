@@ -93,7 +93,8 @@ class mainWin(qtw.QDialog):
 
         #Add signals to the slots 
         self.combo_cpt.currentIndexChanged.connect(self.viewPalette)   
-        self.btn_file_input.clicked.connect(self.inputFile)  
+        self.btn_file_input.clicked.connect(self.inputFile) 
+        self.chk_cpt_inverted.stateChanged.connect(self.reverseCPT)
         self.btn_file_output.clicked.connect(self.outputFile)
         self.btn_fill_defaults.clicked.connect(self.populateDefaults)      
         self.slider_opacity.valueChanged.connect(self.getSliderValue)
@@ -285,8 +286,12 @@ class mainWin(qtw.QDialog):
     def getSliderValue(self):
         val = self.slider_opacity.value()         
         self.lbl_slider_value.setText(str(val) + "%") 
-        self.viewPalette()
+        self.viewPalette(self.chk_cpt_inverted.isChecked())
 
+    def reverseCPT(self):
+        self.viewPalette(self.chk_cpt_inverted.isChecked())
+        
+            
     ###########################################################################################################################
     #Read the input file. It should only be plain text with 4 columns (Longitude, Latitude, and 2 other columns containing
     #numerical data). While reading, split the file into 4 lists, sort them, and return the min and max values for each column.
@@ -386,13 +391,13 @@ class mainWin(qtw.QDialog):
     #This will cause the color palette control to redraw. This will fire whenever a new .cpt file is selected from the combo box
     #or when the value is changed on the transparency slider control.
     ########################################################################################################################### 
-    def viewPalette(self, alpha=255):           
+    def viewPalette(self, normal=True, alpha=255):           
         val = self.slider_opacity.value()  
         cpt = self.combo_cpt.currentText() 
 
         #To paint the gradient, the alpha value needs to be in the range of 0-255...
         alpha = float(val/100) * 255
-        self.viewer.DrawPalette(cpt, alpha)
+        self.viewer.DrawPalette(cpt, self.chk_cpt_inverted.isChecked(), alpha)
 
     ###########################################################################################################################
     #This will call up a QFileDialog for saving the map parameters (.map file)
@@ -449,6 +454,7 @@ class mainWin(qtw.QDialog):
         self.gmtMap.CPTMaxValue = self.txt_cpt_max.text().strip()
         self.gmtMap.CPTInterval = self.txt_cpt_interval.text().strip()
         self.gmtMap.ScaleUnit = self.combo_cpt_unit.currentText()  
+        self.gmtMap.CPTReverse = self.chk_cpt_inverted.isChecked()
         
         #File Output
         self.gmtMap.FileOutput = self.txt_file_output.text().strip()
@@ -611,6 +617,7 @@ class mainWin(qtw.QDialog):
         self.txt_cpt_max.setText(self.gmtMap.CPTMaxValue)
         self.txt_cpt_interval.setText(self.gmtMap.CPTInterval)
         self.combo_cpt_unit.setCurrentText(self.gmtMap.ScaleUnit)
+        self.chk_cpt_inverted.setChecked(self.gmtMap.CPTReverse)
         
         #Output File
         self.txt_file_output.setText(self.gmtMap.FileOutput)
